@@ -15,6 +15,7 @@ case "$1" in
     chmod 755 /usr/lib/omv-agent          # traversable by omv-agent-watch
     chmod 640 /usr/lib/omv-agent/*.py
     chmod 644 /usr/lib/omv-agent/watcher.py   # readable by omv-agent-watch
+    chmod 644 /usr/lib/omv-agent/discoverer.py
     chmod 644 /usr/lib/omv-agent/static/widget.js
 
     # Set knowledge base permissions
@@ -46,6 +47,8 @@ case "$1" in
     systemctl daemon-reload
     systemctl enable omv-agent-watch.service
     systemctl restart omv-agent-watch.service
+    systemctl enable omv-agent-discover.service 2>/dev/null || true
+    systemctl restart omv-agent-discover.service 2>/dev/null || true
 
     # probe_cache.py runs as root — owned by root
     chmod 644 /usr/lib/omv-agent/probe_cache.py

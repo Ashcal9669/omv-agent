@@ -4,22 +4,34 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
-PKG_NAME="openmediavault-agent_1.2.0_all.deb"
+VER_DIR="$SCRIPT_DIR/versions"
+VERSION="1.3-1.0"
+PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 echo "=== OMV Agent Helper — Build Script ==="
 echo ""
 
-# Create dist directory
-mkdir -p "$OUT_DIR"
+# Create dist and versions directories
+mkdir -p "$OUT_DIR" "$VER_DIR"
+
+# Backup any existing .deb before overwriting
+echo "[0/5] Backing up previous build..."
+for old in "$OUT_DIR"/openmediavault-agent_*.deb; do
+    [ -f "$old" ] || continue
+    base="$(basename "$old" .deb)"
+    ts="$(date +%Y%m%d_%H%M%S)"
+    cp -f "$old" "$VER_DIR/${base}_backup_${ts}.deb"
+    echo "    Backed up: versions/${base}_backup_${ts}.deb"
+done
 
 # Copy widget.js to static serving dir
-echo "[1/5] Preparing static files..."
+echo "[1/6] Preparing static files..."
 mkdir -p "$PKG_DIR/usr/lib/omv-agent/static"
 cp -f "$PKG_DIR/usr/lib/omv-agent/widget.js" \
       "$PKG_DIR/usr/lib/omv-agent/static/widget.js"
 
 # Copy knowledge base to package
-echo "[2/5] Copying knowledge base..."
+echo "[2/6] Copying knowledge base..."
 if [ -f "$SCRIPT_DIR/knowledge/knowledge_base.json" ]; then
     mkdir -p "$PKG_DIR/usr/share/omv-agent/knowledge"
     cp -f "$SCRIPT_DIR/knowledge/knowledge_base.json" \
@@ -38,7 +50,7 @@ EOF
 fi
 
 # Set permissions
-echo "[3/5] Setting permissions..."
+echo "[3/6] Setting permissions..."
 # DEBIAN scripts must be executable
 chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/prerm" \
@@ -54,7 +66,7 @@ chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/postrm"
 
 # Validate control file
-echo "[4/5] Validating package structure..."
+echo "[4/6] Validating package structure..."
 if [ ! -f "$PKG_DIR/DEBIAN/control" ]; then
     echo "ERROR: DEBIAN/control not found!" >&2
     exit 1
@@ -73,7 +85,9 @@ REQUIRED=(
     "etc/systemd/system/omv-agent.service"
     "etc/systemd/system/omv-agent-probe.service"
     "etc/systemd/system/omv-agent-watch.service"
+    "etc/systemd/system/omv-agent-discover.service"
     "usr/lib/omv-agent/watcher.py"
+    "usr/lib/omv-agent/discoverer.py"
     "usr/share/openmediavault/workbench/navigation.d/omv-agent.yaml"
     "usr/share/openmediavault/workbench/route.d/omv-agent.json"
 )
@@ -86,7 +100,10 @@ done
 echo "    All required files present."
 
 # Build the .deb
-echo "[5/5] Building .deb package..."
+echo "[5/6] Syncing version to DEBIAN/control..."
+sed -i "s/^Version:.*/Version: $VERSION/" "$PKG_DIR/DEBIAN/control"
+
+echo "[6/6] Building .deb package..."
 dpkg-deb --build --root-owner-group "$PKG_DIR" "$OUT_DIR/$PKG_NAME"
 
 echo ""

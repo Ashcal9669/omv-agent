@@ -9,6 +9,9 @@ import sys
 import os
 import json
 import re
+import secrets
+import tempfile
+import time
 import uuid
 import argparse
 import logging
@@ -297,6 +300,108 @@ def get_events():
         return jsonify({"events": [], "count": 0, "last_updated": 0})
     except Exception:
         return jsonify({"events": [], "count": 0, "last_updated": 0})
+
+
+@app.route("/events", methods=["POST"])
+@require_json
+def post_event():
+    """
+    Accept an event from another local OMV plugin and append it to the shared
+    event queue.  Only loopback callers are permitted (enforced here in addition
+    to the before_request middleware so the contract is explicit).
+
+    Body: { "level": str, "type": str, "source": str, "msg": str }
+    Returns: { "ok": true, "id": str } with HTTP 201 on success.
+    """
+    EVENT_QUEUE = "/run/omv-agent/event_queue.json"
+
+    # Explicit loopback check (defence-in-depth; middleware already enforces this)
+    if request.remote_addr != "127.0.0.1":
+        abort(403)
+
+    # Parse body
+    data = request.get_json(force=False, silent=True)
+    if data is None:
+        return jsonify({"error": "Content-Type must be application/json"}), 415
+
+    # Required fields
+    for field in ("level", "type", "source", "msg"):
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    # Validate level
+    level = str(data["level"])
+    if level not in ("info", "warning", "critical"):
+        return jsonify({"error": "level must be one of: info, warning, critical"}), 400
+
+    # Validate type — alphanumeric, hyphens, underscores, 1-64 chars
+    etype = str(data["type"])
+    if not re.match(r'^[a-zA-Z0-9_-]{1,64}$', etype):
+        return jsonify({"error": "type must match ^[a-zA-Z0-9_-]{1,64}$"}), 400
+
+    # Sanitize source and msg — strip non-printable chars, enforce max length
+    def _sanitize(value: str, max_len: int) -> str:
+        cleaned = "".join(c for c in str(value) if c.isprintable())
+        return cleaned[:max_len]
+
+    source = _sanitize(data["source"], 128)
+    msg    = _sanitize(data["msg"],    512)
+
+    # Build event record
+    event_id = secrets.token_hex(8)
+    new_event = {
+        "id":        event_id,
+        "timestamp": int(time.time()),
+        "level":     level,
+        "type":      etype,
+        "source":    source,
+        "msg":       msg,
+    }
+
+    # Atomic queue update
+    try:
+        # Read current queue
+        try:
+            with open(EVENT_QUEUE, "r") as f:
+                queue_data = json.load(f)
+        except FileNotFoundError:
+            queue_data = {"events": [], "last_updated": 0}
+        except Exception:
+            queue_data = {"events": [], "last_updated": 0}
+
+        events = queue_data.get("events", [])
+        if not isinstance(events, list):
+            events = []
+
+        # Append and enforce ring-buffer limit of 100
+        events.append(new_event)
+        if len(events) > 100:
+            events = events[-100:]
+
+        queue_data["events"] = events
+        queue_data["last_updated"] = new_event["timestamp"]
+
+        # Write atomically via tempfile in same directory
+        queue_dir = os.path.dirname(EVENT_QUEUE)
+        fd, tmp_path = tempfile.mkstemp(dir=queue_dir)
+        try:
+            os.chmod(tmp_path, 0o644)
+            with os.fdopen(fd, "w") as tf:
+                json.dump(queue_data, tf)
+            os.replace(tmp_path, EVENT_QUEUE)
+        except Exception:
+            # Clean up temp file if replace failed
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+
+    except Exception:
+        log.error("post_event: failed to write event queue", exc_info=True)
+        return jsonify({"error": "queue unavailable"}), 503
+
+    return jsonify({"ok": True, "id": event_id}), 201
 
 
 # ── Error handlers ─────────────────────────────────────────────────────────────

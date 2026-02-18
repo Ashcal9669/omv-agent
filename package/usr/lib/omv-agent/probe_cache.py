@@ -39,14 +39,52 @@ def _run(cmd: list, timeout: int = TIMEOUT) -> str:
 
 # ── Fast probes (every 5s) ───────────────────────────────────────────────────
 
+def _read_rrd_last(rrd_path, ds_name, daemon_sock="unix:/run/rrdcached.sock"):
+    """Read last value for a DS from an RRD file via rrdtool subprocess. Returns float or None."""
+    try:
+        result = subprocess.run(
+            ['rrdtool', 'lastupdate', rrd_path, '--daemon', daemon_sock],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode != 0:
+            return None
+        lines = result.stdout.strip().splitlines()
+        if len(lines) < 2:
+            return None
+        ds_names = lines[0].strip().split()
+        parts = lines[1].strip().split(': ', 1)
+        values = parts[1].split() if len(parts) > 1 else []
+        data = {name: (float(val) if val not in ('nan', 'NaN') else None)
+                for name, val in zip(ds_names, values)}
+        return data.get(ds_name)
+    except Exception:
+        return None
+
+
 def probe_system() -> dict:
-    load = _run(["cat", "/proc/loadavg"]).split()
+    # Try RRD for load averages first (collectd writes here on OMV 8)
+    RRD_LOAD = "/var/lib/rrdcached/db/localhost/load/load.rrd"
+    load_1m  = _read_rrd_last(RRD_LOAD, "shortterm")
+    load_5m  = _read_rrd_last(RRD_LOAD, "midterm")
+    load_15m = _read_rrd_last(RRD_LOAD, "longterm")
+
+    if load_1m is None or load_5m is None or load_15m is None:
+        # Fall back to /proc/loadavg
+        load = _run(["cat", "/proc/loadavg"]).split()
+        load_1m_str  = load[0] if len(load) > 0 else "?"
+        load_5m_str  = load[1] if len(load) > 1 else "?"
+        load_15m_str = load[2] if len(load) > 2 else "?"
+    else:
+        load_1m_str  = f"{load_1m:.2f}"
+        load_5m_str  = f"{load_5m:.2f}"
+        load_15m_str = f"{load_15m:.2f}"
+
     mem = _run(["free", "-h"])
     uptime = _run(["uptime", "-p"]).strip()
     return {
-        "load_1m":  load[0] if len(load) > 0 else "?",
-        "load_5m":  load[1] if len(load) > 1 else "?",
-        "load_15m": load[2] if len(load) > 2 else "?",
+        "load_1m":  load_1m_str,
+        "load_5m":  load_5m_str,
+        "load_15m": load_15m_str,
         "memory": mem.strip(),
         "uptime": uptime,
     }

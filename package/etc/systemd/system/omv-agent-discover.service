@@ -1,0 +1,34 @@
+[Unit]
+Description=OMV Agent Discovery Daemon
+Documentation=https://github.com/Ashcal9669/omv-agent
+After=local-fs.target
+PartOf=omv-agent.service
+
+[Service]
+Type=simple
+User=omv-agent-watch
+Group=omv-agent-watch
+ExecStart=/usr/bin/python3 /usr/lib/omv-agent/discoverer.py
+Restart=on-failure
+RestartSec=10
+
+# Hardening
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/run/omv-agent
+ReadOnlyPaths=/var/lib/dpkg/info /etc/systemd/system /lib/systemd/system /etc/nginx /etc/cron.d /etc/cron.daily /etc/apt
+MemoryMax=16M
+CPUQuota=3%
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=omv-agent-discover
+
+[Install]
+WantedBy=multi-user.target

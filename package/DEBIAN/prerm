@@ -4,7 +4,7 @@ set -e
 case "$1" in
   remove|upgrade|deconfigure)
     # Stop and disable services
-    for svc in omv-agent.service omv-agent-probe.service omv-agent-watch.service; do
+    for svc in omv-agent.service omv-agent-probe.service omv-agent-watch.service omv-agent-discover.service; do
       if systemctl is-active --quiet $svc 2>/dev/null; then
         systemctl stop $svc
       fi
