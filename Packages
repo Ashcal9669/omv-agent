@@ -5,7 +5,7 @@ Maintainer: OMV Agent Project <omv-agent@localhost>
 Installed-Size: 256
 Depends: openmediavault (>= 8), python3 (>= 3.9), python3-flask, nginx
 Suggests: python3-pip
-Filename: openmediavault-agent_1.3-1.0_all.deb
+Filename: dist/openmediavault-agent_1.3-1.0_all.deb
 Size: 69732
 MD5sum: d76f1b08cb4c50febe66dd53bf148a5f
 SHA1: 6fcb2832a7307be5bf4cc776217e1f46b48eef31
