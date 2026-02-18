@@ -1,5 +1,8 @@
-# Built packages
-dist/
+# Built packages — track .deb releases for apt repo, ignore intermediates
+dist/*.deb
+!dist/openmediavault-agent_*.deb
+versions/*.deb
+!versions/openmediavault-agent_*.deb
 
 # Python
 __pycache__/
