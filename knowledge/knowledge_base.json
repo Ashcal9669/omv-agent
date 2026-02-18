@@ -1,0 +1,1827 @@
+{
+  "version": "1.0",
+  "omv_version": "8",
+  "generated": "2026-02-18",
+  "source": "Scanned from live OMV 8 installation: /usr/share/openmediavault/workbench/ and /usr/share/openmediavault/engined/rpc/",
+  "entries": [
+    {
+      "id": "nav-overview",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "OMV 8 Web UI Top-Level Navigation",
+      "content": "OpenMediaVault 8 web interface top-level navigation sections (all require admin role except Dashboard): Dashboard (/dashboard, position 10, icon: apps) - summary widgets showing system status. System (/system, position 20, icon: laptop) - system-wide settings. Network (/network, position 30, icon: network) - networking configuration. Storage (/storage, position 40, icon: nas) - disk and filesystem management. Services (/services, position 50, icon: share) - file sharing services. Users (/usermgmt, position 60, icon: users) - user and group accounts. Diagnostics (/diagnostics, position 70, icon: heartPulse) - system health and logs. The positions determine menu order. All sections except Dashboard require the admin role to access.",
+      "tags": [
+        "navigation",
+        "menu",
+        "ui",
+        "pages",
+        "urls",
+        "overview"
+      ],
+      "context_pages": [
+        "/dashboard",
+        "/system",
+        "/network",
+        "/storage",
+        "/services",
+        "/usermgmt",
+        "/diagnostics"
+      ],
+      "related_ids": [
+        "nav-storage",
+        "nav-services",
+        "nav-system",
+        "nav-network",
+        "nav-diagnostics",
+        "nav-usermgmt"
+      ]
+    },
+    {
+      "id": "nav-storage",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "Storage Section: All Pages and URLs",
+      "content": "Storage section (/storage) sub-pages from navigation.d files: 1) Disks (/storage/disks, position 10) - list physical drives, configure hdparm, wipe disks, rescan SCSI. 2) S.M.A.R.T. (/storage/smart, position 20) - disk health monitoring with sub-pages: Settings (/storage/smart/settings), Devices (/storage/smart/devices, enable per-disk monitoring), Scheduled Tasks (/storage/smart/tasks). 3) Multiple Device (/storage/md, position 30) - software RAID via mdadm with routes for: create, grow, recover, remove, details. 4) File Systems (/storage/filesystems, position 40) - filesystem creation (ext4, xfs, btrfs, jfs, f2fs), mounting, growing; routes for each fs type: ext4, xfs, btrfs, f2fs, jfs. 5) Bcache (/storage/bcache, position 15) - SSD block-layer cache with sub-pages for Cache devices and Backing devices. 6) Shared Folders (/storage/shared-folders, position 90) - define named folder paths on mounted filesystems for use by services.",
+      "tags": [
+        "storage",
+        "disks",
+        "smart",
+        "raid",
+        "md",
+        "filesystem",
+        "shared-folders",
+        "bcache",
+        "urls"
+      ],
+      "context_pages": [
+        "/storage",
+        "/storage/disks",
+        "/storage/smart",
+        "/storage/smart/settings",
+        "/storage/smart/devices",
+        "/storage/smart/tasks",
+        "/storage/md",
+        "/storage/filesystems",
+        "/storage/bcache",
+        "/storage/shared-folders"
+      ],
+      "related_ids": [
+        "omv-disks",
+        "omv-smart",
+        "omv-md-raid",
+        "omv-filesystems",
+        "omv-shared-folders",
+        "omv-bcache"
+      ]
+    },
+    {
+      "id": "nav-services",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "Services Section: All Pages and URLs",
+      "content": "Services section (/services) sub-pages: 1) SMB/CIFS (/services/smb) - Windows file sharing, sub-pages: Settings (/services/smb/settings); Shares (/services/smb/shares). 2) NFS (/services/nfs) - Linux/Unix file sharing, sub-pages: Settings (/services/nfs/settings); Shares (/services/nfs/shares). 3) SSH (/services/ssh) - secure shell access, enable/disable, port, auth options. 4) Rsync (/services/rsync) - sync jobs and daemon, sub-pages: Server Settings, Modules (/services/rsync/server/modules), Tasks. 5) WOL (/services/wol) - Wake-on-LAN packet sender to specific MAC addresses. 6) Locate (/services/locate) - updatedb/locate file indexing database. 7) PWM Fan (/services/pwmfan) - pulse-width modulation fan speed control.",
+      "tags": [
+        "services",
+        "smb",
+        "cifs",
+        "nfs",
+        "ssh",
+        "rsync",
+        "wol",
+        "locate",
+        "pwmfan",
+        "urls"
+      ],
+      "context_pages": [
+        "/services/smb",
+        "/services/smb/settings",
+        "/services/smb/shares",
+        "/services/nfs",
+        "/services/nfs/settings",
+        "/services/nfs/shares",
+        "/services/ssh",
+        "/services/rsync",
+        "/services/wol"
+      ],
+      "related_ids": [
+        "omv-smb",
+        "omv-nfs",
+        "omv-ssh",
+        "omv-rsync"
+      ]
+    },
+    {
+      "id": "nav-system",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "System Section: All Pages and URLs",
+      "content": "System section (/system) sub-pages: 1) Workbench (/system/workbench) - web UI settings: HTTP/HTTPS port, session timeout, SSL certificate selection. 2) Date & Time (/system/date-time) - NTP server configuration, timezone selection. 3) Notification (/system/notification) - email alerts setup: Settings (SMTP config), Events (which events trigger emails). 4) Power Management (/system/powermgmt) - scheduled standby/shutdown/reboot: Settings, Scheduled Tasks. 5) Monitoring (/system/monitoring) - collectd/RRD performance graph settings. 6) Scheduled Tasks (/system/cron) - cron job management. 7) Update Management (/system/updatemgmt) - system updates: Updates list, Settings. 8) Plugins (/system/plugins) - install/remove OMV plugins. 9) Certificates (/system/certificate) - SSL (/system/certificate/ssl) and SSH (/system/certificate/ssh) key management. 10) omv-extras (/system/omvextras) - extra package repositories.",
+      "tags": [
+        "system",
+        "workbench",
+        "datetime",
+        "ntp",
+        "notification",
+        "power",
+        "monitoring",
+        "cron",
+        "updates",
+        "plugins",
+        "certificates",
+        "omvextras",
+        "urls"
+      ],
+      "context_pages": [
+        "/system/workbench",
+        "/system/date-time",
+        "/system/notification",
+        "/system/powermgmt",
+        "/system/monitoring",
+        "/system/cron",
+        "/system/updatemgmt",
+        "/system/plugins",
+        "/system/certificate",
+        "/system/omvextras"
+      ],
+      "related_ids": [
+        "omv-notifications",
+        "omv-cron",
+        "omv-plugins",
+        "omv-certificates",
+        "omv-power"
+      ]
+    },
+    {
+      "id": "nav-network",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "Network Section: All Pages and URLs",
+      "content": "Network section (/network) sub-pages: 1) General (/network/general) - hostname, domain name, DNS servers, IPv4/IPv6 forwarding. 2) Interfaces (/network/interfaces) - configure all network interfaces. Supports: Ethernet (physical NICs), Bond (link aggregation), VLAN (802.1Q), Wireless (WiFi with WPA), Bridge (for VMs). Each interface configurable for DHCP or static IP, MTU, wake-on-LAN. 3) Proxy (/network/proxy) - HTTP/HTTPS proxy configuration for package downloads and updates. 4) Firewall (/network/firewall) - iptables/ip6tables rules management. Sub-page: Rules (/network/firewall/rules) for creating allow/deny rules by protocol, port, source/destination.",
+      "tags": [
+        "network",
+        "interfaces",
+        "ethernet",
+        "bond",
+        "vlan",
+        "wireless",
+        "bridge",
+        "proxy",
+        "firewall",
+        "dns",
+        "hostname",
+        "urls"
+      ],
+      "context_pages": [
+        "/network/general",
+        "/network/interfaces",
+        "/network/proxy",
+        "/network/firewall",
+        "/network/firewall/rules"
+      ],
+      "related_ids": [
+        "omv-network-config",
+        "omv-firewall"
+      ]
+    },
+    {
+      "id": "nav-diagnostics",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "Diagnostics Section: All Pages and URLs",
+      "content": "Diagnostics section (/diagnostics) sub-pages: 1) System Information (/diagnostics/system-information) - hardware summary: CPU model, RAM, uptime, kernel version, OMV version, OS version. 2) System Logs (/diagnostics/system-logs) - log file browser: syslog, auth.log, daemon.log, kern.log; Remote (syslog remote server config). 3) Processes (/diagnostics/processes) - real-time process list similar to top. 4) Performance Statistics (/diagnostics/performance-statistics) - RRD/collectd graphs: CPU, Memory, Load, Uptime, Network Interfaces, Disk Usage. 5) Services (/diagnostics/services) - service running status overview for SMB, NFS, SSH. 6) Report (/diagnostics/report) - download full diagnostic report including hardware, network, storage info.",
+      "tags": [
+        "diagnostics",
+        "logs",
+        "processes",
+        "performance",
+        "statistics",
+        "cpu",
+        "memory",
+        "services-status",
+        "report",
+        "urls"
+      ],
+      "context_pages": [
+        "/diagnostics/system-information",
+        "/diagnostics/system-logs",
+        "/diagnostics/processes",
+        "/diagnostics/performance-statistics",
+        "/diagnostics/services",
+        "/diagnostics/report"
+      ],
+      "related_ids": [
+        "omv-monitoring",
+        "omv-troubleshoot-general"
+      ]
+    },
+    {
+      "id": "nav-usermgmt",
+      "topic": "OMV 8 Navigation & Pages",
+      "title": "Users Section: All Pages and URLs",
+      "content": "Users section (/usermgmt) sub-pages: 1) Settings (/usermgmt/settings) - default shell for new users, default group assignment. 2) Users (/usermgmt/users) - create, edit, delete user accounts. Fields: username, password, shell, groups membership, email, SSH public keys, comment. 3) Groups (/usermgmt/groups) - create/edit/delete groups, manage group members. Users and groups are real Linux system accounts in /etc/passwd, /etc/shadow, /etc/group. The 'admin' account is the OMV web UI administrator only and cannot be used as a shared folder privilege target. Default NAS group is 'users' - shared folder access typically requires membership.",
+      "tags": [
+        "users",
+        "groups",
+        "accounts",
+        "permissions",
+        "linux-users",
+        "admin",
+        "urls"
+      ],
+      "context_pages": [
+        "/usermgmt/settings",
+        "/usermgmt/users",
+        "/usermgmt/groups"
+      ],
+      "related_ids": [
+        "omv-user-management",
+        "omv-shared-folder-permissions"
+      ]
+    },
+    {
+      "id": "omv-disks",
+      "topic": "OMV-specific operations",
+      "title": "Disk Management in OMV (Storage > Disks)",
+      "content": "The Disks page (Storage > Disks, /storage/disks) lists all physical block devices detected. Information shown per disk: device name (/dev/sdX or by-id path), model, size, vendor, serial number, WWN, temperature (from SMART if enabled), power mode (active/standby). Per-disk configuration (hdparm): spin-down time (in units of 5 seconds, 0=disabled), APM level (1-254, lower=more aggressive power saving), AAM (Automatic Acoustic Management). Wipe disk operation: Quick wipe uses sgdisk --zap-all plus dd to zero first 10MiB and last 10MiB. Secure wipe uses shred -v -n 1. Both destroy all partition tables and data. The OS root disk is shown as read-only and cannot be wiped. Rescan SCSI Bus: writes '- - -' to all /sys/class/scsi_host/host*/scan entries and '1' to /sys/class/scsi_device/*/device/rescan. RPC: DiskMgmt (enumerateDevices, getList, getListBg, getHdParm, setHdParm, wipe, rescan).",
+      "tags": [
+        "disks",
+        "hdparm",
+        "wipe",
+        "spin-down",
+        "apm",
+        "scsi",
+        "rescan",
+        "temperature",
+        "serial"
+      ],
+      "context_pages": [
+        "/storage/disks"
+      ],
+      "related_ids": [
+        "issue-disk-not-showing",
+        "omv-smart",
+        "safety-wipe-disk"
+      ]
+    },
+    {
+      "id": "omv-smart",
+      "topic": "OMV-specific operations",
+      "title": "S.M.A.R.T. Monitoring in OMV",
+      "content": "S.M.A.R.T. is at Storage > S.M.A.R.T. (/storage/smart). Settings: enable/disable smartd daemon, temperature thresholds for info/warning/critical, polling interval (minutes). Devices: enable per-disk monitoring, device type override (auto, ata, scsi, sat). Scheduled Tasks: configure short/long self-tests per drive on a schedule. CLI: smartctl -a /dev/sdX (all info), smartctl -l selftest /dev/sdX (self-test log), smartctl -H /dev/sdX (health summary). Key SMART attributes: Attr 5 (Reallocated Sectors Count), Attr 9 (Power On Hours), Attr 187 (Reported Uncorrectable Errors), Attr 197 (Current Pending Sector Count), Attr 198 (Offline Uncorrectable). Any non-zero value for attrs 5, 187, 197, 198 is a warning sign. Self-test types: Short (typically 2 min), Long (hours depending on disk size). RPC: Smart (enumerateDevices, enumerateMonitoredDevices, getList, getSettings, setSettings, getDeviceSettings, setDeviceSettings, getAttributes, getSelfTestLogs, getInformation, getScheduleList, getScheduledTest, setScheduledTest, deleteScheduledTest, executeScheduledTest).",
+      "tags": [
+        "smart",
+        "disk-health",
+        "smartctl",
+        "selftest",
+        "attributes",
+        "monitoring",
+        "smartd",
+        "temperature"
+      ],
+      "context_pages": [
+        "/storage/smart",
+        "/storage/smart/settings",
+        "/storage/smart/devices",
+        "/storage/smart/tasks"
+      ],
+      "related_ids": [
+        "omv-disks",
+        "omv-notifications",
+        "issue-disk-not-showing"
+      ]
+    },
+    {
+      "id": "omv-filesystems",
+      "topic": "OMV-specific operations",
+      "title": "File System Management in OMV (Storage > File Systems)",
+      "content": "File Systems page (Storage > File Systems, /storage/filesystems) manages filesystem creation and mounting. Status codes: 1=Available (detected and mounted), 2=Initializing (being formatted), 3=Missing (configured but not found). Filesystem types supported: ext4, xfs, btrfs, jfs, f2fs. Btrfs creation supports RAID data/metadata profiles: single, dup, RAID0, RAID1, RAID10, RAID5, RAID6. Mount operation: adds entry to OMV config database, creates mount point /srv/UUID/, adds to /etc/fstab via Salt, then mounts. Unmount: removes mount point config, applies fstab changes. Grow: expands filesystem to fill device (ext4 and xfs support online resize). After creating a filesystem, you must mount it before creating Shared Folders on it. OMV mount point paths: /srv/<UUID-of-device>. RPC: FileSystemMgmt (enumerateFilesystems, enumerateMountedFilesystems, getList, getListBg, getCandidates, create, createBtrfs, grow, setMountPoint, umountByFsName, umountByDir, hasFilesystem, getDetails).",
+      "tags": [
+        "filesystem",
+        "ext4",
+        "xfs",
+        "btrfs",
+        "jfs",
+        "f2fs",
+        "mount",
+        "fstab",
+        "format",
+        "create",
+        "grow"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "fs-ext4",
+        "fs-btrfs",
+        "fs-xfs",
+        "omv-shared-folders",
+        "omv-md-raid",
+        "safety-fstab"
+      ]
+    },
+    {
+      "id": "omv-shared-folders",
+      "topic": "OMV-specific operations",
+      "title": "Shared Folder Management in OMV",
+      "content": "Shared Folders (Storage > Shared Folders, /storage/shared-folders) define named storage paths that services expose to the network. Prerequisites: filesystem must be mounted. Creating a shared folder: 1) Click Add. 2) Name (globally unique). 3) Select filesystem/volume. 4) Relative path (subdirectory within the volume, cannot contain '..'). 5) Permissions mode (default 775). When created: OMV creates the directory (or btrfs subvolume for btrfs volumes), sets group ownership to 'users', sets setgid bit. Shared folder absolute path: <mount-point>/<relative-path>, e.g. /srv/disk-uuid/myfolder/. Privileges dialog: set per-user and per-group access (no access=NULL, read-only=5, read/write=7). ACL dialog: set POSIX ACL entries for granular per-user/per-group permissions using setfacl/getfacl. Snapshots: available for btrfs-backed shared folders. Delete modes: remove config only (data stays), or remove config AND delete all content (rm -f -r). Cannot delete if referenced by an active service. RPC: ShareMgmt (getCandidates, enumerateSharedFolders, get, set, delete, getPrivileges, setPrivileges, getPrivilegesByRole, setPrivilegesByRole, copyPrivileges, getFileACL, setFileACL, getPath, enumerateSnapshots, createSnapshot, createScheduledSnapshotTask, deleteSnapshot, restoreSnapshot, fromSnapshot, getSnapshotLifecycle, setSnapshotLifecycle).",
+      "tags": [
+        "shared-folders",
+        "shares",
+        "permissions",
+        "acl",
+        "btrfs",
+        "subvolume",
+        "snapshots",
+        "privileges"
+      ],
+      "context_pages": [
+        "/storage/shared-folders"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "omv-smb",
+        "omv-nfs",
+        "omv-shared-folder-permissions",
+        "issue-permission-denied",
+        "safety-delete-shared-folder"
+      ]
+    },
+    {
+      "id": "omv-shared-folder-permissions",
+      "topic": "OMV-specific operations",
+      "title": "Shared Folder Permissions, Privileges, and ACL",
+      "content": "OMV uses two permission layers for shared folders. Layer 1 - OMV Privileges (simple): set via Storage > Shared Folders > Privileges button. Values: no access (NULL), read-only (perms=5, maps to r-x), read/write (perms=7, maps to rwx). Applied by OMV Salt state via setfacl/chmod. Layer 2 - POSIX ACL (fine-grained): set via ACL dialog using getfacl/setfacl. Supports named user/group ACL entries, default ACLs (inherited by new files). Requires filesystem to support ACL - ext4, xfs, btrfs do; FAT/NTFS/exFAT do not. Common permission issues and fixes: 1) User cannot access share - check user is in 'users' group (Users > Groups). 2) Correct OMV privilege not working - apply changes via Salt (yellow banner). 3) New files wrong permissions - check setgid bit: ls -la should show 'drwxrwsr-x'. Reset: chmod g+s /srv/UUID/folder. 4) Manual permission reset: chmod -R 775 /srv/UUID/folder && chown -R :users /srv/UUID/folder && chmod g+s /srv/UUID/folder. 5) Admin user cannot be given privileges (web admin only, not a NAS user). 6) After privilege changes, must click Apply in OMV UI and wait for Salt deployment.",
+      "tags": [
+        "permissions",
+        "acl",
+        "posix-acl",
+        "setfacl",
+        "getfacl",
+        "privileges",
+        "users-group",
+        "chmod",
+        "chown",
+        "setgid"
+      ],
+      "context_pages": [
+        "/storage/shared-folders",
+        "/usermgmt/users"
+      ],
+      "related_ids": [
+        "omv-shared-folders",
+        "issue-permission-denied",
+        "omv-user-management"
+      ]
+    },
+    {
+      "id": "omv-md-raid",
+      "topic": "OMV-specific operations",
+      "title": "Software RAID (Multiple Device) in OMV",
+      "content": "Software RAID is at Storage > Multiple Device (/storage/md). Uses Linux mdadm. RAID levels: RAID 0 (striping, no redundancy), RAID 1 (mirroring, 1 drive can fail, min 2 disks), RAID 4 (dedicated parity disk), RAID 5 (distributed parity, 1 drive can fail, min 3 disks), RAID 6 (double parity, 2 drives can fail, min 4 disks), RAID 10 (striped mirrors, min 4 disks). Workflow: 1) Create RAID device (select level + member disks) -> appears as /dev/mdX. 2) Go to File Systems, create filesystem on /dev/mdX. 3) Mount the filesystem. 4) Create Shared Folders on it. Operations: Grow (add disks to expand array, then resize filesystem), Recover (rebuild degraded array), Remove (stop and delete array). Monitor: cat /proc/mdstat (real-time status). Detail: mdadm --detail /dev/mdX. After reboot, RAID auto-assembles via /etc/mdadm/mdadm.conf. RPC: MdMgmt (enumerateDevices, getList, get, getSlaves, getCandidates, create, grow, add, remove, delete, getDetail).",
+      "tags": [
+        "raid",
+        "mdadm",
+        "software-raid",
+        "md",
+        "raid0",
+        "raid1",
+        "raid5",
+        "raid6",
+        "raid10",
+        "multiple-device",
+        "parity"
+      ],
+      "context_pages": [
+        "/storage/md"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "omv-disks",
+        "fs-proc-sys"
+      ]
+    },
+    {
+      "id": "omv-bcache",
+      "topic": "OMV-specific operations",
+      "title": "Bcache SSD Caching in OMV",
+      "content": "Bcache is at Storage > Bcache (/storage/bcache). Allows fast SSDs to cache slow HDDs at the block level. Components: Cache device (SSD) - the fast caching device; Backing device (HDD) - the slow device being cached. Cache modes: writethrough (data written to both SSD cache and HDD simultaneously, safe), writeback (data written to SSD first, then flushed to HDD later, faster but small data loss risk on power failure), writearound (bypass cache for writes, reads still cached). After creation, the backing device appears as /dev/bcacheX and should be used like a normal block device. RPC: bcache (getCacheList, createCache, deleteCache, unregisterCache, getCacheConfiguration, setCacheConfiguration, getCacheStatistic, clearCacheStatistic, getBackingList, getCacheCandidates, createBacking, deleteBacking, getBacking, updateBacking, unregisterBacking, getBackingConfiguration, setBackingConfiguration, forceRunBacking, register, getBackingStatistic, clearBackingStatistic, getSuperBlock).",
+      "tags": [
+        "bcache",
+        "cache",
+        "ssd",
+        "hdd",
+        "performance",
+        "block-cache",
+        "writethrough",
+        "writeback"
+      ],
+      "context_pages": [
+        "/storage/bcache"
+      ],
+      "related_ids": [
+        "omv-disks",
+        "omv-filesystems"
+      ]
+    },
+    {
+      "id": "omv-smb",
+      "topic": "OMV-specific operations",
+      "title": "SMB/CIFS (Samba) Configuration in OMV",
+      "content": "SMB is at Services > SMB/CIFS (/services/smb). Settings: enable/disable Samba globally, workgroup name (default WORKGROUP), server description, enable NetBIOS over TCP (nmbd), enable home directories, enable WINS server support. Shares: create individual Samba shares. Per-share options: name, comment, select shared folder, public/guest access (yes=no auth required), read-only, browseable, enable recycle bin (vfs objects = recycle, with configurable max size and path), inherit owner/permissions, enable ACL support (maps to POSIX ACL), shadow copies. Config file: /etc/samba/smb.conf (managed by OMV Salt). Services: smbd (file sharing daemon), nmbd (NetBIOS name service). After changes: omv-salt deploy run smb. Check config: testparm. View connections: smbstatus. Add user to Samba manually: smbpasswd -a username (OMV does this automatically). Connect from Windows: \\\\server-ip\\sharename. Mount on Linux: mount -t cifs //server/share /mnt -o username=user,password=pass,vers=3.0. RPC: SMB (getSettings, setSettings, getShareList, getShare, setShare, deleteShare, emptyRecycleBin, getStats).",
+      "tags": [
+        "smb",
+        "cifs",
+        "samba",
+        "windows",
+        "shares",
+        "workgroup",
+        "netbios",
+        "recycle-bin",
+        "guest"
+      ],
+      "context_pages": [
+        "/services/smb",
+        "/services/smb/settings",
+        "/services/smb/shares"
+      ],
+      "related_ids": [
+        "omv-shared-folders",
+        "issue-share-not-accessible",
+        "issue-permission-denied",
+        "fs-smb-cifs"
+      ]
+    },
+    {
+      "id": "omv-nfs",
+      "topic": "OMV-specific operations",
+      "title": "NFS Configuration in OMV",
+      "content": "NFS is at Services > NFS (/services/nfs). Settings: enable/disable NFS server, supported NFS versions (v3, v4). Shares: create NFS exports. Per-share settings: shared folder selection, client (IP address like 192.168.1.100, network like 192.168.1.0/24, or * for all), access type (read/write or read-only), additional options field. File managed: /etc/exports. After changes: omv-salt deploy run nfs, or exportfs -ra. Service: nfs-server. Check exports: exportfs -v. Show exports to client: showmount -e server-ip. Mount from Linux client: mount -t nfs -o vers=4,rw server:/srv/UUID/folder /mnt/target. Key NFS export options: rw (read-write), ro (read-only), sync (safe, write confirmed before ack), async (faster, less safe), no_root_squash (root on client maps to root on server - security risk), root_squash (default, root mapped to nobody), all_squash (all users mapped to anonymous), no_subtree_check (recommended), anonuid/anongid (set anonymous user mapping). Ports: NFS v4 uses 2049 TCP only; NFS v3 uses 2049 TCP/UDP plus portmapper 111. RPC: NFS (getSettings, setSettings, getShareList, getShare, setShare, deleteShare, getStats).",
+      "tags": [
+        "nfs",
+        "nfs4",
+        "exports",
+        "linux",
+        "unix",
+        "shares",
+        "mount",
+        "no_root_squash",
+        "exportfs"
+      ],
+      "context_pages": [
+        "/services/nfs",
+        "/services/nfs/settings",
+        "/services/nfs/shares"
+      ],
+      "related_ids": [
+        "omv-shared-folders",
+        "fs-nfs",
+        "issue-share-not-accessible"
+      ]
+    },
+    {
+      "id": "omv-ssh",
+      "topic": "OMV-specific operations",
+      "title": "SSH Configuration in OMV",
+      "content": "SSH is at Services > SSH (/services/ssh). Configuration options: enable/disable SSH service, port number (default 22), allow password authentication (disable for key-only access), permit root login (yes/no/forced-commands-only), enable public key authentication, TCP forwarding, compression. SSH keys for individual users: Users > Users > edit user > SSH Public Keys tab. Config file: /etc/ssh/sshd_config (managed by OMV). After changes apply via OMV UI. Check status: systemctl status ssh. Reload config without dropping connections: systemctl reload ssh. RPC: SSH (get, set, getStats).",
+      "tags": [
+        "ssh",
+        "openssh",
+        "sshd",
+        "remote-access",
+        "public-key",
+        "authentication",
+        "port"
+      ],
+      "context_pages": [
+        "/services/ssh"
+      ],
+      "related_ids": [
+        "omv-certificates",
+        "omv-user-management"
+      ]
+    },
+    {
+      "id": "omv-rsync",
+      "topic": "OMV-specific operations",
+      "title": "Rsync Configuration in OMV",
+      "content": "Rsync is at Services > Rsync (/services/rsync). Two components: 1) Rsync Server (rsyncd daemon): Settings sub-page enables the rsync daemon on port 873. Modules sub-page defines named module paths accessible to remote rsync clients. Per-module settings: name, path, comment, auth required, read-only, max connections, allow/deny hosts. Config: /etc/rsyncd.conf. 2) Rsync Tasks (client jobs): Create scheduled sync jobs. Per-task settings: source (local shared folder or remote rsync:// URL), destination, direction (push/pull), schedule (cron-like), recursive, delete extra files, compress, preserve permissions/timestamps. Tasks are saved as cron jobs. Run task immediately: Execute button. RPC: Rsync (getList, get, set, delete, execute) for tasks; Rsyncd (getSettings, setSettings, getModuleList, getModule, setModule, deleteModule) for daemon.",
+      "tags": [
+        "rsync",
+        "rsyncd",
+        "backup",
+        "sync",
+        "scheduled",
+        "tasks",
+        "daemon",
+        "module"
+      ],
+      "context_pages": [
+        "/services/rsync"
+      ],
+      "related_ids": [
+        "omv-cron",
+        "omv-shared-folders"
+      ]
+    },
+    {
+      "id": "omv-network-config",
+      "topic": "OMV-specific operations",
+      "title": "Network Interface Configuration in OMV",
+      "content": "Network configuration is at Network section. General page (/network/general): hostname, domain name, DNS nameservers, IPv4 and IPv6 forwarding enable/disable. Interfaces page (/network/interfaces): lists all detected network interfaces. Interface types supported: Ethernet (physical NIC), Bond (link aggregation, modes: 0=round-robin, 1=active-backup, 4=802.3ad/LACP, etc.), VLAN (802.1Q tagging, parent interface + VLAN ID), Wireless (WiFi, WPA/WPA2), Bridge (software bridge for VMs/containers). Per-interface settings: DHCP or manual IP/mask/gateway/DNS, IPv6 mode, MTU, wake-on-LAN enable. After changes: omv-salt deploy run interfaces. Check: ip addr, ip route, networkctl status. Proxy (/network/proxy): HTTP/HTTPS proxy for apt, system downloads. RPC: Network (getGeneralSettings, setGeneralSettings, enumerateDevices, getInterfaceList, getInterface, deleteInterface, getEthernetIface, setEthernetIface, getBondIface, setBondIface, getVlanIface, setVlanIface, getWirelessIface, setWirelessIface, getBridgeIface, setBridgeIface, getProxy, setProxy, identify, getInformation).",
+      "tags": [
+        "network",
+        "ethernet",
+        "bond",
+        "vlan",
+        "wireless",
+        "bridge",
+        "dhcp",
+        "static-ip",
+        "hostname",
+        "dns",
+        "gateway",
+        "mtu"
+      ],
+      "context_pages": [
+        "/network/general",
+        "/network/interfaces"
+      ],
+      "related_ids": [
+        "issue-webui-not-loading",
+        "omv-firewall",
+        "safety-network-change"
+      ]
+    },
+    {
+      "id": "omv-firewall",
+      "topic": "OMV-specific operations",
+      "title": "Firewall (iptables/ip6tables) in OMV",
+      "content": "Firewall is at Network > Firewall (/network/firewall/rules). OMV manages iptables (IPv4) and ip6tables (IPv6) rules. Rule parameters: family (inet=IPv4, inet6=IPv6), action (ACCEPT, REJECT, DROP, LOG), chain (INPUT, OUTPUT, FORWARD), protocol (tcp, udp, icmp, all), source address/port, destination address/port. Rules are evaluated top-to-bottom, first match wins. OMV does not add default block rules - it is permissive by default. After changes apply via OMV UI: omv-salt deploy run iptables. View current rules: iptables -L -n -v, ip6tables -L -n -v. Flush all rules (emergency): iptables -F && iptables -X && iptables -P INPUT ACCEPT && iptables -P OUTPUT ACCEPT && iptables -P FORWARD ACCEPT. CRITICAL: always ensure port 80/443 (web UI) and port 22 (SSH) have ACCEPT rules before adding any DROP rules to avoid lockout. RPC: Iptables (getRules, setRules, getRules6, setRules6, getRule, setRule, deleteRule).",
+      "tags": [
+        "firewall",
+        "iptables",
+        "ip6tables",
+        "rules",
+        "security",
+        "network",
+        "accept",
+        "drop",
+        "reject"
+      ],
+      "context_pages": [
+        "/network/firewall",
+        "/network/firewall/rules"
+      ],
+      "related_ids": [
+        "issue-webui-not-loading",
+        "safety-firewall"
+      ]
+    },
+    {
+      "id": "omv-notifications",
+      "topic": "OMV-specific operations",
+      "title": "Email Notifications Setup in OMV",
+      "content": "Email notifications are at System > Notification (/system/notification). Settings page (SMTP configuration): server address, port (common: 587 for TLS/STARTTLS, 465 for SSL, 25 for unencrypted), TLS/SSL mode (none, STARTTLS, SSL/TLS), authentication (username + password), sender email address, recipient email address. Test Email button sends a verification email. Events page: individual enable/disable per notification category (authentication events, disk health, filesystem usage, RAID events, software updates, service failures). OMV uses Postfix as local MTA configured to relay through the SMTP server. Common SMTP providers: Gmail (smtp.gmail.com:587, STARTTLS, requires App Password if 2FA enabled), Outlook/Hotmail (smtp-mail.outlook.com:587). For Gmail with 2FA: go to Google Account > Security > App Passwords to generate a 16-character app password. RPC: Notification (getList, setList, get, set, isEnabled).",
+      "tags": [
+        "notifications",
+        "email",
+        "smtp",
+        "alerts",
+        "postfix",
+        "gmail",
+        "tls",
+        "starttls",
+        "app-password"
+      ],
+      "context_pages": [
+        "/system/notification"
+      ],
+      "related_ids": [
+        "omv-smart",
+        "omv-md-raid"
+      ]
+    },
+    {
+      "id": "omv-cron",
+      "topic": "OMV-specific operations",
+      "title": "Scheduled Tasks (Cron Jobs) in OMV",
+      "content": "Scheduled Tasks are at System > Scheduled Tasks (/system/cron). Create cron jobs with fields: enable/disable toggle, type (userdefined, reboot, shutdown, standby), execution time (preset: hourly, daily, weekly, monthly, yearly, or custom cron expression), command to run, username to run as (root for system tasks), send email on completion. Cron expression format: 'minute hour day-of-month month day-of-week'. Examples: '0 3 * * 0' = Sundays at 3am, '*/30 * * * *' = every 30 minutes, '0 0 1 * *' = 1st of each month. Jobs are written to /etc/cron.d/ files managed by OMV. Execute immediately: Run button. Common uses: cleanup scripts, custom backups, maintenance tasks. RPC: Cron (getList, get, set, delete, execute).",
+      "tags": [
+        "cron",
+        "scheduled-tasks",
+        "automation",
+        "schedule",
+        "crontab",
+        "backup",
+        "reboot",
+        "shutdown"
+      ],
+      "context_pages": [
+        "/system/cron"
+      ],
+      "related_ids": [
+        "omv-power",
+        "omv-rsync",
+        "omv-shared-folders"
+      ]
+    },
+    {
+      "id": "omv-power",
+      "topic": "OMV-specific operations",
+      "title": "Power Management in OMV",
+      "content": "Power Management is at System > Power Management (/system/powermgmt). Settings page: configure CPU governor (performance, powersave, ondemand, conservative, userspace). Scheduled Jobs page: create time-based power events (shutdown, reboot, standby/sleep, hibernate). These are implemented as cron jobs. Disk spin-down is configured separately in Storage > Disks via hdparm settings (spindown_time parameter, APM level). For individual disk spin-down: select disk in Storage > Disks, click Edit, configure power management tab. Standby timeout is in units of 5 seconds (value 1-240) or 30 seconds (241-251) for IDE drives. For modern drives, APM level 127 allows spin-down, APM 254 disables APM. RPC: PowerMgmt (get, set, getScheduleList, getScheduledJob, setScheduledJob, deleteScheduledJob, executeScheduledJob, enumerateStandbyModes). System-level commands: poweroff, reboot, systemctl suspend, systemctl hibernate.",
+      "tags": [
+        "power",
+        "standby",
+        "sleep",
+        "hibernate",
+        "shutdown",
+        "spin-down",
+        "hdparm",
+        "apm",
+        "governor",
+        "cpu"
+      ],
+      "context_pages": [
+        "/system/powermgmt"
+      ],
+      "related_ids": [
+        "omv-smart",
+        "omv-cron"
+      ]
+    },
+    {
+      "id": "omv-certificates",
+      "topic": "OMV-specific operations",
+      "title": "Certificate and SSH Key Management in OMV",
+      "content": "Certificates are at System > Certificates (/system/certificate). SSL Certificates (/system/certificate/ssl): Import existing SSL certificate (paste PEM certificate + private key) or generate self-signed certificate (set common name, organization, country, validity period). SSL certificates are used by the OMV web UI for HTTPS (configure in System > Workbench) and by other SSL-enabled services. Generates: .crt and .key files stored in /etc/ssl/. SSH Keys (/system/certificate/ssh): Create SSH key pairs (RSA or ECDSA), import existing public keys, delete keys. The copySshId method copies the public key to a remote server's authorized_keys for passwordless authentication (used by rsync tasks for remote server authentication). After creating SSL cert, go to System > Workbench, select the certificate in the HTTPS settings. RPC: CertificateMgmt (getList, get, set, delete, getDetail, create, getSshList, createSsh, getSsh, setSsh, deleteSsh, copySshId).",
+      "tags": [
+        "certificates",
+        "ssl",
+        "tls",
+        "https",
+        "ssh-keys",
+        "self-signed",
+        "pem",
+        "rsa",
+        "ecdsa"
+      ],
+      "context_pages": [
+        "/system/certificate"
+      ],
+      "related_ids": [
+        "omv-ssh",
+        "nav-system"
+      ]
+    },
+    {
+      "id": "omv-plugins",
+      "topic": "OMV-specific operations",
+      "title": "Plugin Management in OMV",
+      "content": "Plugins are at System > Plugins (/system/plugins). Shows packages available from configured OMV plugin repositories. Install: click Install button (runs apt-get install). Remove: select installed plugin, click Remove (runs apt-get remove). After plugin install/remove, OMV applies the configuration changes automatically. Popular community plugins (requires omv-extras repository): openmediavault-compose (Docker Compose + Portainer CE), openmediavault-mergerfs (union/pooling filesystem), openmediavault-snapraid (parity-based data protection for large media collections), openmediavault-zfs (ZFS on Linux support), openmediavault-luksencryption (LUKS disk encryption), openmediavault-flashmemory (log2ram, reduces flash wear on SD cards). Plugin packages follow naming: openmediavault-<name>. To list installed plugins: dpkg -l openmediavault-* RPC: Plugin (enumeratePlugins, getList, remove, upload, install).",
+      "tags": [
+        "plugins",
+        "install",
+        "remove",
+        "apt",
+        "repository",
+        "omv-extras",
+        "docker",
+        "mergerfs",
+        "snapraid",
+        "zfs",
+        "luks"
+      ],
+      "context_pages": [
+        "/system/plugins"
+      ],
+      "related_ids": [
+        "omv-extras",
+        "omv-docker",
+        "issue-plugin-failure"
+      ]
+    },
+    {
+      "id": "omv-extras",
+      "topic": "OMV-specific operations",
+      "title": "omv-extras Plugin Repository Manager",
+      "content": "omv-extras (/system/omvextras) is a community-maintained plugin repository manager. Must be installed first before most community plugins are available. After installation, the omv-extras page appears in System > omv-extras. Features: enable/disable omv-extras repository, enable Debian backports repository (provides newer kernel and packages for better hardware support), clean apt cache. After enabling repositories, run Update in System > Update Management to refresh package lists. RPC: omvextras (get, set, backports, clean).",
+      "tags": [
+        "omv-extras",
+        "plugins",
+        "docker",
+        "backports",
+        "repository",
+        "community"
+      ],
+      "context_pages": [
+        "/system/omvextras"
+      ],
+      "related_ids": [
+        "omv-plugins",
+        "omv-docker"
+      ]
+    },
+    {
+      "id": "omv-docker",
+      "topic": "OMV-specific operations",
+      "title": "Docker and Portainer via omv-extras",
+      "content": "Docker is not built into OMV core. Available via the omv-extras ecosystem. Steps: 1) Install omv-extras (see omv-extras entry). 2) Go to System > Plugins, search for 'compose' or 'docker'. 3) Install openmediavault-compose plugin. 4) This installs Docker CE and Portainer CE. 5) Access Portainer at http://server-ip:9000 (default, first run setup). Docker data: /var/lib/docker/. Container volumes: use paths from OMV Shared Folders as bind mounts in docker-compose files (e.g., /srv/disk-uuid/mydata:/container/data). After OMV system updates: run omv-salt deploy run systemd to ensure Docker service unit is current. Common Docker commands: docker ps (running containers), docker-compose up -d (start stack), docker-compose down (stop), docker logs <container> (view logs).",
+      "tags": [
+        "docker",
+        "portainer",
+        "containers",
+        "compose",
+        "docker-compose",
+        "omv-extras",
+        "container",
+        "appdata"
+      ],
+      "context_pages": [
+        "/system/plugins",
+        "/system/omvextras"
+      ],
+      "related_ids": [
+        "omv-extras",
+        "omv-plugins"
+      ]
+    },
+    {
+      "id": "omv-salt-apply",
+      "topic": "OMV-specific operations",
+      "title": "Applying Configuration Changes in OMV (omv-salt)",
+      "content": "OMV uses SaltStack to translate database configuration into actual system files. When changes are made in the web UI, a yellow 'Apply' banner appears. Clicking Apply triggers: omv-salt deploy run <changed-modules>. Key command: omv-salt deploy run all (apply all pending changes). Module-specific apply: omv-salt deploy run smb (Samba only), omv-salt deploy run nfs, omv-salt deploy run fstab, omv-salt deploy run interfaces, omv-salt deploy run iptables, omv-salt deploy run monit, omv-salt deploy run cron, omv-salt deploy run postfix, omv-salt deploy run nginx, omv-salt deploy run systemd. After system package upgrades: always run omv-salt deploy run systemd to re-apply systemd service unit files. Config database: /etc/openmediavault/config.xml. Check Salt minion: systemctl status salt-minion. If Salt hangs: systemctl restart salt-minion. OMV engine: systemctl status openmediavault-engined (handles RPC requests from the web UI).",
+      "tags": [
+        "salt",
+        "omv-salt",
+        "apply",
+        "configuration",
+        "deployment",
+        "modules",
+        "config.xml",
+        "engined"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "issue-plugin-failure",
+        "issue-webui-not-loading",
+        "issue-after-upgrade"
+      ]
+    },
+    {
+      "id": "omv-reset-admin-password",
+      "topic": "OMV-specific operations",
+      "title": "Reset OMV Admin Password",
+      "content": "To reset the OMV web UI admin password when locked out. Method 1 (recommended): Log in via SSH or physical console as root. Run: omv-firstaid. Select the option for 'Reset web administrator password'. Enter and confirm new password. Method 2: If SSH is also unavailable, connect a monitor and keyboard for physical console access. Important distinctions: The OMV web admin password is separate from the Linux root password. The Linux root password is changed with: passwd root (via console). The OMV admin account exists as a system account; OMV web login uses PAM authentication.",
+      "tags": [
+        "admin",
+        "password",
+        "reset",
+        "omv-firstaid",
+        "locked-out",
+        "recovery"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "issue-webui-not-loading",
+        "safety-passwords"
+      ]
+    },
+    {
+      "id": "omv-user-management",
+      "topic": "OMV-specific operations",
+      "title": "User and Group Management in OMV",
+      "content": "User management is at Users section (/usermgmt). Users (/usermgmt/users): create/edit/delete Linux system users. Fields: username (alphanumeric, no spaces), password, shell (default /bin/sh or /usr/sbin/nologin to prevent terminal login), groups, home directory (optional), comment, SSH public keys (for key-based SSH auth), disableaccount toggle. Groups (/usermgmt/groups): create/edit/delete Linux groups, add/remove members. Settings (/usermgmt/settings): default shell, default group for new users (typically 'users'). All users are real Linux accounts added to /etc/passwd, /etc/shadow, /etc/group. OMV also adds users to Samba database (smbpasswd) for SMB access. The 'admin' user is the OMV web UI administrator - it cannot receive shared folder privileges and should not be used as a NAS data user. Import users: CSV format (username, password, uid, gid, comment, homedir, shell). RPC: UserMgmt (authUser, enumerateSystemUsers, enumerateUsers, getUserList, getUser, setUser, deleteUser, importUsers, getGroupList, getGroup, setGroup, deleteGroup, importGroups, getSettings, setSettings, setPasswordByContext).",
+      "tags": [
+        "users",
+        "groups",
+        "accounts",
+        "linux",
+        "passwd",
+        "shadow",
+        "samba",
+        "ssh-keys",
+        "import",
+        "quota"
+      ],
+      "context_pages": [
+        "/usermgmt/users",
+        "/usermgmt/groups",
+        "/usermgmt/settings"
+      ],
+      "related_ids": [
+        "omv-shared-folder-permissions",
+        "issue-permission-denied"
+      ]
+    },
+    {
+      "id": "omv-monitoring",
+      "topic": "OMV-specific operations",
+      "title": "System Monitoring and Performance Statistics",
+      "content": "Monitoring configuration is at System > Monitoring (/system/monitoring). Uses collectd daemon with RRDtool for storing and graphing time-series data. Settings: enable/disable collectd. Performance statistics graphs at Diagnostics > Performance Statistics (/diagnostics/performance-statistics) with sub-pages: CPU (usage per core, system/user/iowait), Memory (RAM usage, swap), System Load (1min/5min/15min averages), Uptime, Network Interfaces (bytes in/out per second per interface), Disk Usage (df - free/used space per mounted filesystem). Data stored in /var/lib/collectd/rrd/. System Information at Diagnostics > System Information shows: CPU model/cores/frequency, total RAM, kernel version, OS version, OMV version, system uptime. System RPC provides: getTopInfo (process list), getCpuStats, getCpuGovernors, getInformation, getDiagnosticReport.",
+      "tags": [
+        "monitoring",
+        "collectd",
+        "rrd",
+        "statistics",
+        "cpu",
+        "memory",
+        "graphs",
+        "uptime",
+        "performance"
+      ],
+      "context_pages": [
+        "/system/monitoring",
+        "/diagnostics/performance-statistics",
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "nav-diagnostics"
+      ]
+    },
+    {
+      "id": "fs-ext4",
+      "topic": "Linux Filesystems",
+      "title": "ext4 Filesystem: Details, Commands, and Options",
+      "content": "ext4 (Fourth Extended Filesystem) is the default OMV filesystem choice, most mature and reliable for NAS use. Features: journaling (ordered mode by default - protects metadata, data written before commit), extents (efficient large file allocation), 48-bit block addresses (supports up to 1 EiB volumes), POSIX ACL support, quota support, online grow. Create: mkfs.ext4 /dev/sdXN or mkfs.ext4 -L 'Label' -m 0 /dev/sdXN (m 0 = no reserved blocks). View info: tune2fs -l /dev/sdXN. Filesystem check (offline only): e2fsck -f /dev/sdXN or fsck.ext4 -f /dev/sdXN. Online grow (after expanding block device): resize2fs /dev/sdXN. Set label: tune2fs -L 'NewLabel' /dev/sdXN. Set reserved blocks: tune2fs -m 0 /dev/sdXN (reduce from default 5% to 0 for data drives). Check inode count: df -i /mnt/point. Common mount options: defaults, relatime, noatime (skip access time update - improves SSD life), errors=remount-ro (remount read-only on error). Journal modes (data=): writeback (fastest, metadata journaled only), ordered (default, good balance), journal (safest, all data journaled, slowest). inode: each file needs one inode; if df -i shows 100% but df shows space, too many small files.",
+      "tags": [
+        "ext4",
+        "filesystem",
+        "journal",
+        "fsck",
+        "e2fsck",
+        "tune2fs",
+        "resize2fs",
+        "inode",
+        "mount-options",
+        "mkfs"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "fs-btrfs",
+        "fs-xfs"
+      ]
+    },
+    {
+      "id": "fs-btrfs",
+      "topic": "Linux Filesystems",
+      "title": "btrfs Filesystem: Features, Commands, and RAID",
+      "content": "btrfs (B-tree Filesystem) is a modern copy-on-write filesystem with rich NAS features. OMV 8 has native btrfs support including shared folder snapshots. Key features: Copy-on-Write (CoW) - modifying a file creates new blocks instead of overwriting; Subvolumes - lightweight logical volumes within the filesystem (OMV creates shared folders as btrfs subvolumes on btrfs volumes); Snapshots - instant read-only or read-write copies of subvolumes; Built-in software RAID (0, 1, 10, 5, 6); Transparent compression (zlib, lzo, zstd); Online balance and scrub. Commands: mkfs.btrfs -L 'Label' /dev/sdX (create single), mkfs.btrfs -d raid1 -m raid1 /dev/sda /dev/sdb (multi-device RAID1). Subvolumes: btrfs subvolume create /mnt/subvol, btrfs subvolume list /mnt, btrfs subvolume delete /mnt/subvol. Snapshots: btrfs subvolume snapshot /mnt/subvol /mnt/.snapshots/snap1 (read-write), btrfs subvolume snapshot -r /mnt/subvol /mnt/.snapshots/snap1 (read-only). Scrub (verify checksums, correct errors): btrfs scrub start /mnt, btrfs scrub status /mnt. Balance (redistribute data blocks): btrfs balance start /mnt. Compression mount option: mount -o compress=zstd:1 /dev/sdX /mnt. Check filesystem usage: btrfs filesystem usage /mnt. Known issues: RAID5/6 has known parity bugs in older kernels, use carefully.",
+      "tags": [
+        "btrfs",
+        "filesystem",
+        "snapshots",
+        "subvolumes",
+        "raid",
+        "compression",
+        "scrub",
+        "balance",
+        "cow",
+        "zstd"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "omv-shared-folders"
+      ]
+    },
+    {
+      "id": "fs-xfs",
+      "topic": "Linux Filesystems",
+      "title": "XFS Filesystem: Features and Commands",
+      "content": "XFS is a high-performance 64-bit journaling filesystem excellent for large files and high-throughput NAS workloads. Features: journaling (metadata only, very fast recovery), extent-based allocation, online grow only (cannot shrink), quota support (user/group/project), POSIX ACL, delayed allocation. Create: mkfs.xfs /dev/sdXN or mkfs.xfs -L 'Label' /dev/sdXN. View info: xfs_info /mnt/point (must be mounted). Check/repair (offline only): xfs_repair /dev/sdXN. Dry-run check: xfs_repair -n /dev/sdXN. Grow (online, filesystem must be mounted): xfs_growfs /mnt/point. Freeze for consistent snapshot: xfs_freeze -f /mnt/point, xfs_freeze -u /mnt/point (unfreeze). Common mount options: defaults, noatime, logbufs=8 (increase log buffers for performance). XFS cannot shrink - plan partition size carefully. Max file size: 8 EiB. Max volume size: 8 EiB.",
+      "tags": [
+        "xfs",
+        "filesystem",
+        "xfs_repair",
+        "xfs_info",
+        "xfs_growfs",
+        "quota",
+        "journal",
+        "mkfs",
+        "freeze"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "fs-ext4"
+      ]
+    },
+    {
+      "id": "fs-ntfs-exfat-others",
+      "topic": "Linux Filesystems",
+      "title": "NTFS, exFAT, tmpfs, and Other Filesystems",
+      "content": "NTFS (Windows New Technology File System): driver is ntfs-3g on Linux (FUSE-based, slower) or the newer kernel ntfs3 driver. Mount: mount -t ntfs-3g /dev/sdXN /mnt -o uid=1000,gid=1000,umask=022. Or: mount -t ntfs3 /dev/sdXN /mnt. Limitations: no POSIX permissions (use uid/gid/umask mount options), no hard links, no symlinks, slower than native Linux filesystems. Not recommended for NAS data volumes. Good for: external drives shared with Windows, USB drives. exFAT: mount -t exfat /dev/sdXN /mnt. Limitations: no journaling, no POSIX permissions, designed for flash media. Not recommended for NAS data. Good for: SD cards, USB drives, cross-platform compatibility. JFS (IBM Journaled File System): supported by OMV for creation. Mature, low CPU usage, fast journal recovery. F2FS (Flash-Friendly File System): optimized for NAND flash storage (SSDs, eMMC). tmpfs: RAM-based temporary filesystem. Mount: mount -t tmpfs -o size=512M tmpfs /tmp/ramdisk. Size parameter prevents using all RAM (unlike ramfs). Used for /tmp, /run in Linux. Data is lost on reboot. /proc/filesystems: lists kernel-supported filesystem types. Check currently mounted: cat /proc/mounts or mount command.",
+      "tags": [
+        "ntfs",
+        "exfat",
+        "fat32",
+        "jfs",
+        "f2fs",
+        "tmpfs",
+        "ramfs",
+        "windows",
+        "usb",
+        "flash"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "omv-filesystems"
+      ]
+    },
+    {
+      "id": "fs-zfs",
+      "topic": "Linux Filesystems",
+      "title": "ZFS on Linux (via openmediavault-zfs plugin)",
+      "content": "ZFS (Zettabyte File System / OpenZFS) is available via the openmediavault-zfs plugin (requires omv-extras). Not a core OMV feature. Concepts: zpool (storage pool containing vdevs), vdev (virtual device: single disk, mirror, RAIDZ1/2/3), dataset (like directory with independent properties), zvol (block device from ZFS), snapshot (read-only point-in-time copy). Pool creation: zpool create tank /dev/sda (single disk), zpool create tank mirror /dev/sda /dev/sdb (mirror), zpool create tank raidz /dev/sda /dev/sdb /dev/sdc (RAIDZ1 = similar to RAID5), zpool create tank raidz2 /dev/sd[abcd] (RAIDZ2 = RAID6). Operations: zpool status (pool health), zpool scrub tank (verify all data checksums), zfs create tank/dataset (new dataset), zfs snapshot tank/dataset@name (snapshot), zfs list (list all), zfs get all tank/dataset (properties). ARC (Adaptive Replacement Cache): in-memory read cache. View: cat /proc/spl/kstat/zfs/arcstats | grep -E 'size|hits|misses'. ZFS needs dedicated RAM; rule of thumb: 1GB RAM per 1TB storage minimum. Compression: zfs set compression=lz4 tank/dataset (recommended, good ratio + performance). Deduplication is very RAM intensive - avoid unless necessary.",
+      "tags": [
+        "zfs",
+        "zpool",
+        "dataset",
+        "snapshots",
+        "arc",
+        "raidz",
+        "mirror",
+        "dedup",
+        "compression",
+        "plugin"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "omv-plugins",
+        "omv-extras"
+      ]
+    },
+    {
+      "id": "fs-nfs",
+      "topic": "Linux Filesystems",
+      "title": "NFS Exports Syntax and Client Mount Options",
+      "content": "NFS /etc/exports syntax: /path client(options). Client types: * (all hosts), 192.168.1.100 (single IP), 192.168.1.0/24 (subnet). Export options: rw (read-write), ro (read-only), sync (server confirms write to disk before responding - safe), async (respond before disk write - faster, small data loss risk on crash), no_root_squash (root on client = root on server - security risk), root_squash (default - client root mapped to nfsnobody/65534), all_squash (all client users mapped to anonymous uid/gid), anonuid=1000 (set anonymous UID), anongid=1000 (set anonymous GID), no_subtree_check (recommended - avoids issues when files are renamed while open). After editing /etc/exports: exportfs -ra (reload without restart), exportfs -v (verbose list), systemctl restart nfs-server (full restart). NFSv4 uses a virtual root; all exports are relative to the NFSv4 root (usually /). Client mount: mount -t nfs4 server:/path /mnt (NFSv4), mount -t nfs -o vers=3 server:/path /mnt (NFSv3). Common client options: hard (retry forever on server unreachable), soft (timeout and return error), timeo=600 (timeout in deciseconds).",
+      "tags": [
+        "nfs",
+        "exports",
+        "mount-options",
+        "no_root_squash",
+        "sync",
+        "async",
+        "nfsv4",
+        "nfsv3",
+        "subtree_check"
+      ],
+      "context_pages": [
+        "/services/nfs"
+      ],
+      "related_ids": [
+        "omv-nfs"
+      ]
+    },
+    {
+      "id": "fs-smb-cifs",
+      "topic": "Linux Filesystems",
+      "title": "SMB/CIFS Share Configuration and Client Mount",
+      "content": "Samba smb.conf per-share config: [sharename], path = /srv/uuid/folder, comment = My Share, valid users = @users (all in 'users' group) or user1 user2, write list = @users, read only = no, create mask = 0664, directory mask = 2775 (setgid bit), guest ok = no. Recycle bin: vfs objects = recycle, recycle:repository = .recycle, recycle:maxsize = 0. Shadow copies (btrfs): vfs objects = shadow_copy2, shadow:snapdir = .snapshots. Test config: testparm (check smb.conf syntax). Check connections: smbstatus. List shares: smbclient -L //server -U user. Connect: smbclient //server/share -U user. Mount CIFS on Linux: mount -t cifs //server/share /mnt -o username=user,password=pass,vers=3.0,uid=1000,gid=1000. Using credentials file: mount -t cifs //server/share /mnt -o credentials=/etc/.cifs-creds,vers=3.0. /etc/.cifs-creds contents: username=myuser, password=mypass, domain=WORKGROUP. fstab entry: //server/share /mnt cifs credentials=/etc/.cifs-creds,vers=3.0,uid=1000,gid=1000,iocharset=utf8 0 0.",
+      "tags": [
+        "smb",
+        "cifs",
+        "samba",
+        "smb.conf",
+        "mount",
+        "credentials",
+        "vfs",
+        "testparm",
+        "smbclient",
+        "shadow-copy"
+      ],
+      "context_pages": [
+        "/services/smb"
+      ],
+      "related_ids": [
+        "omv-smb"
+      ]
+    },
+    {
+      "id": "fs-proc-sys",
+      "topic": "Linux Filesystems",
+      "title": "/proc and /sys Key Files for System Monitoring",
+      "content": "/proc key monitoring files: /proc/meminfo - RAM stats (MemTotal, MemFree, MemAvailable, Buffers, Cached, SwapTotal, SwapFree, Dirty, Writeback); /proc/cpuinfo - CPU model name, cpu MHz, cache size, flags; /proc/diskstats - disk I/O stats (reads completed, sectors read, writes completed, sectors written, I/Os in progress, ms total); /proc/mounts - currently mounted filesystems (device, mountpoint, fstype, options); /proc/mdstat - software RAID status (array state, rebuild progress, sync speed); /proc/net/dev - network interface statistics (bytes, packets, errors, drops per interface); /proc/loadavg - system load (1min 5min 15min running/total lastpid); /proc/uptime - seconds since boot, seconds CPU idle; /proc/partitions - block device partitions. /sys key paths: /sys/block/sdX/queue/scheduler - I/O scheduler (read current, echo 'mq-deadline' > scheduler to change); /sys/block/sdX/queue/rotational - 0=SSD, 1=HDD; /sys/block/sdX/size - size in 512-byte sectors; /sys/class/scsi_host/hostX/scan - write '- - -' to rescan SCSI; /sys/class/net/ethX/statistics/ - network stats; /sys/class/hwmon/hwmonX/temp1_input - temperature in millidegrees.",
+      "tags": [
+        "proc",
+        "sys",
+        "meminfo",
+        "cpuinfo",
+        "diskstats",
+        "mdstat",
+        "monitoring",
+        "linux",
+        "sysfs"
+      ],
+      "context_pages": [
+        "/diagnostics/system-information",
+        "/diagnostics/performance-statistics"
+      ],
+      "related_ids": [
+        "omv-monitoring",
+        "omv-md-raid"
+      ]
+    },
+    {
+      "id": "rpc-services-list",
+      "topic": "OMV RPC Services",
+      "title": "All OMV RPC Services and Their Methods",
+      "content": "Complete list of RPC services from /usr/share/openmediavault/engined/rpc/ (37 files scanned from live OMV 8 install): DiskMgmt: enumerateDevices, getList, getListBg, getHdParm, setHdParm, wipe, rescan. FileSystemMgmt: enumerateFilesystems, enumerateMountedFilesystems, getList, getListBg, getCandidates, getCandidatesBg, getMountCandidates, create, createBtrfs, grow, setMountPoint, umountByFsName, umountByDir, hasFilesystem, getDetails. ShareMgmt: getCandidates, enumerateSharedFolders, getList, get, set, delete, getPrivileges, setPrivileges, getPrivilegesByRole, setPrivilegesByRole, copyPrivileges, getFileACL, setFileACL, getPath, enumerateSnapshots, enumerateAllSnapshots, createSnapshot, createScheduledSnapshotTask, enumerateScheduledSnapshotTasks, deleteSnapshot, restoreSnapshot, fromSnapshot, getSnapshotLifecycle, setSnapshotLifecycle. UserMgmt: authUser, enumerateSystemUsers, enumerateUsers, enumerateAllUsers, enumerateSystemGroups, enumerateGroups, enumerateAllGroups, getUserList, getUser, getUserByContext, setUser, setUserByContext, deleteUser, importUsers, getGroupList, getGroup, setGroup, deleteGroup, importGroups, getSettings, setSettings, setPasswordByContext. SMB: getSettings, setSettings, getShareList, getShare, setShare, deleteShare, emptyRecycleBin, getStats. NFS: getSettings, setSettings, getShareList, getShare, setShare, deleteShare, getStats. SSH: get, set, getStats. Smart: enumerateDevices, enumerateMonitoredDevices, getList, getListBg, getSettings, setSettings, getDeviceSettings, setDeviceSettings, getAttributes, getSelfTestLogs, getInformation, getExtendedInformation, getScheduleList, getScheduledTest, setScheduledTest, deleteScheduledTest, executeScheduledTest. MdMgmt: enumerateDevices, getList, get, getSlaves, getCandidates, create, grow, add, remove, delete, getDetail. Network: getGeneralSettings, setGeneralSettings, enumerateDevices, getInterfaceList, getInterface, deleteInterface, getEthernetIface, setEthernetIface, getBondIface, setBondIface, getVlanIface, setVlanIface, getWirelessIface, setWirelessIface, getBridgeIface, setBridgeIface, getProxy, setProxy. Iptables: getRules, setRules, getRules6, setRules6, getRule, setRule, deleteRule. Cron: getList, get, set, delete, execute. PowerMgmt: get, set, getScheduleList, getScheduledJob, setScheduledJob, deleteScheduledJob, executeScheduledJob, enumerateStandbyModes. CertificateMgmt: getList, get, set, delete, getDetail, create, getSshList, createSsh, getSsh, setSsh, deleteSsh, copySshId. Notification: getList, setList, get, set, isEnabled. Apt: getSoftwareSettings, setSoftwareSettings, enumerateUpgraded, getUpgradedList, install, upgrade, update, upload, getChangeLog. Plugin: enumeratePlugins, getList, remove, upload, install. Rsync: getList, get, set, delete, execute. Rsyncd: getSettings, setSettings, getModuleList, getModule, setModule, deleteModule. System: noop, getTopInfo, getShells, reboot, shutdown, standby, suspend, hibernate, getTimeSettings, setTimeSettings, getTimeZoneList, getInformation, getDiagnosticReport, getCpuStats, getCpuGovernors. bcache: getCacheList, createCache, deleteCache, unregisterCache, getCacheConfiguration, setCacheConfiguration, getBackingList, getCacheCandidates, createBacking, deleteBacking, getBacking, updateBacking, unregisterBacking, getBackingConfiguration, setBackingConfiguration, forceRunBacking, register, getBackingStatistic, clearBackingStatistic, getSuperBlock. omvextras: get, set, backports, clean. Quota: get, set, getByTypeName, setByTypeName, delete. PerfStats: get, set.",
+      "tags": [
+        "rpc",
+        "api",
+        "services",
+        "methods",
+        "backend",
+        "php"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "omv-disks",
+        "omv-filesystems",
+        "omv-smb",
+        "omv-nfs"
+      ]
+    },
+    {
+      "id": "issue-disk-not-showing",
+      "topic": "Common Issues & Solutions",
+      "title": "Disk Not Showing Up in OMV",
+      "content": "Troubleshooting a physical disk that does not appear in Storage > Disks: 1) Click Rescan SCSI Bus button in the Disks page. 2) Check OS detection: lsblk -f (list block devices with filesystem info), ls /dev/sd* (list SATA/SAS devices), ls /dev/nvme* (NVMe drives). 3) Check dmesg for drive events: dmesg | grep -i 'sd\\|sata\\|ata\\|disk\\|block' | tail -30. 4) USB drives: lsusb, dmesg | tail -20 after plugging in. 5) Drive with existing filesystem: blkid shows filesystem but OMV may not show as mountable if already configured in another mount point. Check cat /etc/fstab. 6) Drives already in use by OMV (has a configured mount point) are shown but may be marked in-use. 7) Root OS disk is shown but marked read-only. 8) Hardware RAID controller: controller may present only logical volumes, not physical disks. 9) Check /proc/partitions for all block devices. 10) For hotplug SATA: check SATA hot-plug support in BIOS/UEFI. 11) If NVMe: check if nvme driver loaded: lsmod | grep nvme.",
+      "tags": [
+        "disk",
+        "not-showing",
+        "detection",
+        "rescan",
+        "lsblk",
+        "dmesg",
+        "troubleshoot",
+        "scsi",
+        "usb"
+      ],
+      "context_pages": [
+        "/storage/disks"
+      ],
+      "related_ids": [
+        "omv-disks",
+        "omv-filesystems"
+      ]
+    },
+    {
+      "id": "issue-share-not-accessible",
+      "topic": "Common Issues & Solutions",
+      "title": "Network Share Not Accessible",
+      "content": "Share not accessible from network clients. SMB/Windows troubleshooting: 1) Verify SMB enabled in Services > SMB > Settings. 2) Check Samba services: systemctl status smbd nmbd. 3) Verify share exists in Services > SMB > Shares with correct shared folder. 4) Check user privileges on shared folder in Storage > Shared Folders > Privileges. 5) Ensure user is in 'users' group: Users > Groups. 6) Check firewall ports: 445 (TCP/SMB), 139 (TCP/NetBIOS), 137-138 (UDP/NetBIOS). 7) Test from command line: smbclient -L //server-ip -U username. 8) Windows credential cache: Control Panel > Credential Manager > clear saved Windows Credentials. 9) Check testparm for config errors. 10) For guest access, verify 'public = yes' in share settings. NFS troubleshooting: 1) Verify NFS enabled: Services > NFS > Settings. 2) Service check: systemctl status nfs-server. 3) List current exports: exportfs -v. 4) Test from server: showmount -e localhost. 5) Check firewall: port 2049 (TCP/UDP) and 111 (portmapper for NFSv3). 6) NFSv4 only needs port 2049. 7) Check client mount options match server (vers=4 or vers=3). 8) Verify client IP matches export client specification.",
+      "tags": [
+        "share",
+        "smb",
+        "nfs",
+        "not-accessible",
+        "network",
+        "troubleshoot",
+        "firewall",
+        "samba"
+      ],
+      "context_pages": [
+        "/services/smb",
+        "/services/nfs"
+      ],
+      "related_ids": [
+        "omv-smb",
+        "omv-nfs",
+        "issue-permission-denied",
+        "omv-firewall"
+      ]
+    },
+    {
+      "id": "issue-permission-denied",
+      "topic": "Common Issues & Solutions",
+      "title": "Permission Denied on Shared Folder Access",
+      "content": "Users getting 'Permission Denied', 'Access Denied', or 'NT_STATUS_ACCESS_DENIED': 1) Check OMV privileges: Storage > Shared Folders > select folder > Privileges button. Set user to read/write (7) or read-only (5). Apply changes. 2) Check group membership: Users > Groups, edit 'users' group, ensure the user is a member. 3) Verify filesystem ACL: ls -la /srv/UUID/ should show group 'users' with write permissions. Directory should have 'drwxrwsr-x' (note the 's' = setgid). 4) For SMB: verify the user exists in Samba: pdbedit -L. 5) Check if filesystem supports ACL: ext4, xfs, btrfs = yes; FAT/NTFS/exFAT = no. 6) If ACL set manually and conflicting, reset: setfacl -b /srv/UUID/folder (remove all ACL). 7) Check if Salt applied successfully after privilege change. 8) Manual permission fix: chmod -R 775 /srv/UUID/folder && chown -R :users /srv/UUID/folder && chmod g+s /srv/UUID/folder. 9) For NFS: check export options (root_squash/no_root_squash, all_squash). 10) Ensure the shared folder path exists: ls -la /srv/UUID/foldername.",
+      "tags": [
+        "permission-denied",
+        "access-denied",
+        "permissions",
+        "acl",
+        "samba",
+        "smb",
+        "nfs",
+        "troubleshoot"
+      ],
+      "context_pages": [
+        "/storage/shared-folders",
+        "/usermgmt/users"
+      ],
+      "related_ids": [
+        "omv-shared-folder-permissions",
+        "omv-user-management",
+        "issue-share-not-accessible"
+      ]
+    },
+    {
+      "id": "issue-webui-not-loading",
+      "topic": "Common Issues & Solutions",
+      "title": "OMV Web UI Not Loading or Unreachable",
+      "content": "Web UI not accessible at http://server-ip or https://server-ip: 1) Check nginx: systemctl status nginx. If failed: systemctl restart nginx. Check nginx errors: journalctl -u nginx -n 50 or tail /var/log/nginx/error.log. 2) Check PHP-FPM: systemctl status php*-fpm. Restart: systemctl restart php8.2-fpm (version may differ). 3) Check OMV engine (API backend): systemctl status openmediavault-engined. Restart: systemctl restart openmediavault-engined. 4) Check listening ports: ss -tlnp | grep -E '80|443'. 5) Check if IP address changed: ip addr show. Ping server, try new IP. 6) Firewall might block port 80/443: iptables -L -n | grep -E '80|443'. 7) If SSL misconfigured, try HTTP: http://server-ip. 8) Reapply nginx config: omv-salt deploy run nginx. 9) If nginx config broken: nginx -t (check syntax). 10) Last resort: reboot server (if physical access available). 11) After reboot, check: journalctl -xe | head -50.",
+      "tags": [
+        "web-ui",
+        "nginx",
+        "php-fpm",
+        "not-loading",
+        "unreachable",
+        "troubleshoot",
+        "http",
+        "https"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "omv-salt-apply",
+        "omv-reset-admin-password",
+        "omv-network-config"
+      ]
+    },
+    {
+      "id": "issue-plugin-failure",
+      "topic": "Common Issues & Solutions",
+      "title": "Plugin Installation Failures",
+      "content": "Plugin installation fails or errors occur: 1) Refresh package lists: System > Update Management > click Check. 2) Ensure required repositories are enabled: if plugin needs omv-extras, install it first. 3) Check disk space: df -h / (root filesystem needs free space). Minimum 1-2GB free. 4) Check internet: ping -c 3 8.8.8.8, apt-get update (from SSH). 5) Manual install: apt-get install openmediavault-<pluginname>. 6) If apt locked: rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock && dpkg --configure -a. 7) After any package install/upgrade: omv-salt deploy run all. 8) After package upgrade causing issues: omv-salt deploy run systemd. 9) Check apt history: tail -50 /var/log/apt/history.log. 10) If dependency conflicts: apt-get -f install (fix broken packages). 11) After removing a plugin, run omv-salt deploy run all to clean up its config.",
+      "tags": [
+        "plugin",
+        "install",
+        "failure",
+        "apt",
+        "dpkg",
+        "repository",
+        "dependency",
+        "troubleshoot"
+      ],
+      "context_pages": [
+        "/system/plugins"
+      ],
+      "related_ids": [
+        "omv-plugins",
+        "omv-extras",
+        "omv-salt-apply"
+      ]
+    },
+    {
+      "id": "issue-after-upgrade",
+      "topic": "Common Issues & Solutions",
+      "title": "After Package Upgrade: Services Not Starting or Misbehaving",
+      "content": "After running system updates (Update Management or apt upgrade on CLI), services may not behave correctly. The essential fix command is: omv-salt deploy run systemd (re-generates and applies systemd service unit files). Full apply: omv-salt deploy run all. If salt-minion itself is broken after upgrade: apt-get install --reinstall salt-minion, then systemctl restart salt-minion && omv-salt deploy run all. Check what is failing: journalctl -xe | head -100 (recent errors), systemctl --failed (list failed units). Common post-upgrade issues: nginx fails (run omv-salt deploy run nginx), PHP version mismatch (run omv-salt deploy run nginx), Samba version change (run omv-salt deploy run smb), NFS kernel module changes (run omv-salt deploy run nfs && systemctl restart nfs-server). Always use OMV's Update Management page for upgrades rather than apt directly to avoid issues. If the OMV web UI becomes inaccessible after upgrade, SSH in and run: omv-salt deploy run all.",
+      "tags": [
+        "upgrade",
+        "update",
+        "after-upgrade",
+        "omv-salt",
+        "systemd",
+        "services",
+        "fix"
+      ],
+      "context_pages": [
+        "/system/updatemgmt"
+      ],
+      "related_ids": [
+        "omv-salt-apply",
+        "issue-webui-not-loading"
+      ]
+    },
+    {
+      "id": "safety-wipe-disk",
+      "topic": "Safety Rules",
+      "title": "WARNING: Disk Wipe - Irreversible Data Loss",
+      "content": "CRITICAL WARNING - DATA LOSS. Wiping a disk PERMANENTLY destroys ALL data and partition tables. This cannot be undone. Before suggesting any disk wipe operation: 1) Explicitly warn the user that ALL DATA on the disk will be permanently destroyed. 2) Require user to confirm they have backups of any important data. 3) Confirm the correct device is targeted - double-check with lsblk or fdisk -l. Mistaking /dev/sda for /dev/sdb destroys the wrong disk. 4) Never suggest wiping the system/OS disk (usually /dev/sda or the disk OMV is installed on). 5) The OMV Wipe function uses: sgdisk --zap-all /dev/sdX (destroy partition table) + dd if=/dev/zero of=/dev/sdX bs=10M count=1 (zero first 10MiB) + dd to zero last 10MiB. Secure wipe uses shred -v -n 1. Commands equally dangerous (DO NOT suggest without clear warnings): dd if=/dev/zero of=/dev/sdX, dd if=/dev/urandom of=/dev/sdX, shred /dev/sdX, sgdisk --zap-all /dev/sdX, parted /dev/sdX mklabel gpt. Always trigger the safety warning for these.",
+      "tags": [
+        "safety",
+        "warning",
+        "wipe",
+        "disk",
+        "data-loss",
+        "irreversible",
+        "dangerous",
+        "critical"
+      ],
+      "context_pages": [
+        "/storage/disks"
+      ],
+      "related_ids": [
+        "omv-disks",
+        "safety-dd"
+      ]
+    },
+    {
+      "id": "safety-network-change",
+      "topic": "Safety Rules",
+      "title": "WARNING: Network Configuration Changes Risk Lockout",
+      "content": "CAUTION - LOCKOUT RISK. Changing network interface configuration (IP address, subnet mask, gateway, DNS, interface type) can make the OMV server unreachable via network. Steps to minimize risk: 1) Warn user that they may lose network access temporarily or permanently if settings are wrong. 2) Recommend having physical (keyboard+monitor) or out-of-band access available before making changes. 3) Verify the new static IP is in the correct subnet and the gateway is correct and reachable. 4) After applying, the server may be briefly unreachable during network restart. 5) Recovery if locked out: physical console, run 'ip addr add <IP>/<mask> dev <interface> && ip route add default via <gateway>' to restore temporary connectivity, then fix OMV config. Or: omv-firstaid (option to configure network). 6) Changing from DHCP to static: note the current IP assignment before switching.",
+      "tags": [
+        "safety",
+        "warning",
+        "network",
+        "lockout",
+        "ip-address",
+        "static",
+        "dhcp",
+        "dangerous"
+      ],
+      "context_pages": [
+        "/network/interfaces",
+        "/network/general"
+      ],
+      "related_ids": [
+        "omv-network-config"
+      ]
+    },
+    {
+      "id": "safety-restart-services",
+      "topic": "Safety Rules",
+      "title": "WARNING: Restarting Services Causes Disruption",
+      "content": "CAUTION. Restarting system services disrupts active users and connections. Services and their impact: nginx restart - web UI becomes unavailable for 1-5 seconds; smbd/nmbd restart - active SMB file transfers drop, Windows clients may show 'network path not available'; nfs-server restart - NFS mounts may hang or become unresponsive on clients (requires remount on client side); sshd restart - existing SSH sessions may disconnect (use 'systemctl reload ssh' instead to reload config without killing sessions); openmediavault-engined restart - web UI API unavailable for seconds. Best practices: 1) Use 'reload' instead of 'restart' when supported (systemctl reload smbd, systemctl reload ssh). 2) Restart during low-usage periods. 3) After restart, verify: systemctl status <service>.",
+      "tags": [
+        "safety",
+        "warning",
+        "restart",
+        "services",
+        "nginx",
+        "smb",
+        "nfs",
+        "ssh",
+        "disruption"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "issue-webui-not-loading",
+        "issue-share-not-accessible"
+      ]
+    },
+    {
+      "id": "safety-fstab",
+      "topic": "Safety Rules",
+      "title": "WARNING: Modifying /etc/fstab Can Break Boot",
+      "content": "CAUTION - BOOT FAILURE RISK. Incorrect /etc/fstab entries can prevent the system from booting. OMV manages /etc/fstab automatically via Salt (do NOT edit manually). If editing /etc/fstab is absolutely necessary: 1) Always backup first: cp /etc/fstab /etc/fstab.backup. 2) Use UUID= identifiers instead of /dev/sdX (device names can change after reboots). Get UUID: blkid /dev/sdXN. 3) After editing, test without rebooting: mount -a (mounts all unmounted fstab entries) and check for errors. 4) Use findmnt --verify to check fstab syntax. 5) The 'nofail' option prevents boot failure if the device is not present. 6) If system fails to boot due to bad fstab: boot with init=/bin/bash via GRUB, mount -o remount,rw /, edit /etc/fstab. Or use rescue/live media.",
+      "tags": [
+        "safety",
+        "warning",
+        "fstab",
+        "boot",
+        "mount",
+        "uuid",
+        "nofail",
+        "dangerous"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "omv-filesystems",
+        "omv-salt-apply"
+      ]
+    },
+    {
+      "id": "safety-passwords",
+      "topic": "Safety Rules",
+      "title": "WARNING: Changing Passwords",
+      "content": "CAUTION. Password changes have important implications: 1) OMV web UI admin password: changed in OMV settings or via omv-firstaid. Separate from Linux root password. If forgotten: omv-firstaid > reset web administrator password. 2) Linux root password: change with 'passwd root' from console. If lost: boot into rescue mode via GRUB (add 'init=/bin/bash' to kernel parameters), then 'mount -o remount,rw / && passwd root'. 3) NAS user password changed via OMV UI: updates both Linux /etc/shadow AND Samba database (smbpasswd) automatically. 4) If changing password via 'passwd username' CLI: Samba password is NOT automatically updated. Run: smbpasswd username (to sync). 5) Do not change passwords of system accounts: www-data, openmediavault, nobody, salt - this can break OMV services. 6) SSH key-based auth: changing password does not affect SSH key authentication.",
+      "tags": [
+        "safety",
+        "warning",
+        "password",
+        "admin",
+        "users",
+        "security",
+        "root",
+        "samba"
+      ],
+      "context_pages": [
+        "/usermgmt/users"
+      ],
+      "related_ids": [
+        "omv-reset-admin-password",
+        "omv-user-management"
+      ]
+    },
+    {
+      "id": "safety-firewall",
+      "topic": "Safety Rules",
+      "title": "WARNING: Firewall Rules Can Lock You Out",
+      "content": "CRITICAL CAUTION - LOCKOUT RISK. Incorrect iptables firewall rules can block access to OMV's web UI or SSH, requiring physical console access to recover. Before adding any DROP or REJECT rules: 1) Ensure an ACCEPT rule for TCP port 80 (HTTP) and/or 443 (HTTPS) is placed before any DROP rule. 2) Ensure an ACCEPT rule for TCP port 22 (SSH) is in place. 3) Add rules one at a time and test connectivity after each addition. 4) If locked out via firewall: physical console, run: iptables -F (flush all filter rules), iptables -P INPUT ACCEPT, iptables -P OUTPUT ACCEPT, iptables -P FORWARD ACCEPT. Then access web UI and remove or fix the offending rule. Then: omv-salt deploy run iptables to re-apply OMV managed rules. 5) OMV's firewall is permissive by default (no default block rules unless you add them). 6) Rule order matters: first matching rule wins.",
+      "tags": [
+        "safety",
+        "warning",
+        "firewall",
+        "iptables",
+        "lockout",
+        "port",
+        "dangerous"
+      ],
+      "context_pages": [
+        "/network/firewall",
+        "/network/firewall/rules"
+      ],
+      "related_ids": [
+        "omv-firewall"
+      ]
+    },
+    {
+      "id": "safety-delete-shared-folder",
+      "topic": "Safety Rules",
+      "title": "WARNING: Deleting Shared Folders with Content",
+      "content": "CAUTION - DATA LOSS RISK. OMV offers two delete modes for shared folders: Mode 1 (Safe): Remove configuration only - removes the OMV folder definition from the database, leaves all data on disk untouched. The directory remains at /srv/UUID/foldername. This is safe and reversible. Mode 2 (DANGEROUS): Remove configuration AND delete all content recursively - permanently deletes all files and subdirectories using 'rm -f -r /srv/UUID/foldername'. This CANNOT be undone. Before suggesting content deletion: 1) Explicitly warn that all data will be permanently destroyed. 2) Ask if the user has a backup. 3) Confirm the correct folder is selected. OMV prevents deletion entirely if the folder is currently referenced by an active service (SMB share, NFS export, rsync task). For btrfs: shared folder deletion also deletes the btrfs subvolume.",
+      "tags": [
+        "safety",
+        "warning",
+        "delete",
+        "shared-folder",
+        "data-loss",
+        "recursive",
+        "dangerous"
+      ],
+      "context_pages": [
+        "/storage/shared-folders"
+      ],
+      "related_ids": [
+        "omv-shared-folders",
+        "safety-dd"
+      ]
+    },
+    {
+      "id": "safety-dd",
+      "topic": "Safety Rules",
+      "title": "WARNING: Dangerous Commands (dd, rm -rf, mkfs)",
+      "content": "EXTREME DANGER. These commands cause irreversible data loss and must NEVER be suggested without explicit warnings and user confirmation: 1) dd if=/dev/zero of=/dev/sdX - overwrites entire disk with zeros. ALL data destroyed permanently. 2) dd if=/dev/urandom of=/dev/sdX - same with random data (secure wipe, slower). 3) rm -rf /path - recursively deletes path. rm -rf / or rm -rf /* is catastrophic (destroys OS). rm -rf with a trailing space before / is a common dangerous typo. 4) mkfs.ext4 /dev/sdX (directly on disk) - destroys partition table and all data. 5) mkfs on a mounted filesystem - can corrupt filesystem. Always unmount first. 6) shred /dev/sdX - secure erase entire disk. 7) sgdisk --zap-all /dev/sdX - destroy partition table. 8) blkdiscard /dev/sdX - trim/discard entire SSD. Response protocol: Before mentioning any of these: (a) Issue a clear WARNING, (b) Require confirmation that user understands the risk, (c) Verify the target device/path is correct, (d) Suggest having a current backup, (e) Recommend typing carefully and verifying before pressing Enter.",
+      "tags": [
+        "safety",
+        "warning",
+        "dd",
+        "rm-rf",
+        "mkfs",
+        "shred",
+        "dangerous",
+        "data-loss",
+        "critical"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "safety-wipe-disk",
+        "safety-fstab"
+      ]
+    },
+    {
+      "id": "omv-troubleshoot-general",
+      "topic": "Common Issues & Solutions",
+      "title": "General OMV Troubleshooting Commands Reference",
+      "content": "Quick reference for OMV troubleshooting from SSH/console (as root). Service management: systemctl status nginx / smbd / nmbd / nfs-server / ssh / openmediavault-engined / salt-minion. Restart service: systemctl restart <service>. View service logs: journalctl -u <service> -n 100. Apply OMV config: omv-salt deploy run all. Reset admin password: omv-firstaid. Disk info: lsblk -f (tree with filesystems), blkid (UUIDs), fdisk -l (partition tables), smartctl -a /dev/sdX (SMART). Filesystem info: df -h (disk usage), df -i (inode usage), mount | grep /srv (OMV mounts). RAID status: cat /proc/mdstat, mdadm --detail /dev/mdX. Network: ip addr, ip route, ss -tlnp (listening ports), ping -c 3 8.8.8.8. Samba: testparm (config check), smbstatus (connections), pdbedit -L (samba users). NFS: exportfs -v (current exports), showmount -e localhost. System logs: journalctl -xe | head -100, tail -f /var/log/syslog, dmesg | tail -30. Package: apt-get update, apt-get install -f (fix broken), dpkg -l openmediavault* (installed OMV packages). Config: cat /etc/openmediavault/config.xml | head -50. Uptime: uptime, cat /proc/loadavg. Memory: free -h, cat /proc/meminfo | head -10.",
+      "tags": [
+        "troubleshoot",
+        "commands",
+        "reference",
+        "systemctl",
+        "journalctl",
+        "diagnostics",
+        "cli"
+      ],
+      "context_pages": [
+        "/diagnostics"
+      ],
+      "related_ids": [
+        "issue-webui-not-loading",
+        "issue-share-not-accessible",
+        "omv-salt-apply"
+      ]
+    },
+    {
+      "id": "sys-hardware-actual",
+      "topic": "This System",
+      "title": "This System: Raspberry Pi 5 Hardware",
+      "content": "Hardware: Raspberry Pi 5, ARM64 (aarch64). RAM: 16GB total (15Gi shown by free). CPU: Broadcom BCM2712, 4-core ARM Cortex-A76 @ 2.4GHz. OS drive: KINGSTON OM8SGP4512K2 476.9GB NVMe (/dev/nvme2n1) - boot partition at /boot/firmware (512MB vfat), root at / (470GB ext4, noatime,nodiratime). CPU temperature sensor at /sys/class/thermal/thermal_zone0/temp (value in millidegrees, divide by 1000 for Celsius). Typical idle: 30-45°C. Check: cat /sys/class/thermal/thermal_zone0/temp. OMV version: 8.x. Kernel: Linux 6.12.x (RPi kernel). Running since ~15 hours uptime per last check.",
+      "tags": [
+        "raspberry-pi",
+        "pi5",
+        "arm64",
+        "hardware",
+        "nvme",
+        "cpu",
+        "temperature",
+        "bcm2712"
+      ],
+      "context_pages": [
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "sys-storage-actual",
+        "sys-network-actual",
+        "sys-temperature-monitoring"
+      ]
+    },
+    {
+      "id": "sys-storage-actual",
+      "topic": "This System",
+      "title": "This System: Storage Layout (RAID0 + bcache + ext4)",
+      "content": "Storage architecture on this system: 4 NVMe drives with a bcache+RAID0 setup. /dev/nvme0n1: WD Blue SN5000 2TB (1.8T) — RAID0 member (linux_raid_member). /dev/nvme1n1: WD_BLACK SN850X 2000GB (1.8T) — bcache cache device (fast NVMe acting as read/write cache). /dev/nvme2n1: KINGSTON OM8SGP4512K2 476.9GB — OS drive (/boot/firmware + /). /dev/nvme3n1: KINGSTON SNV3S2000G 1.8T — RAID0 member (linux_raid_member). Topology: nvme0n1 + nvme3n1 → md0 (RAID0, 3.6TB backing device) + nvme1n1 (bcache cache) → bcache0 (3.6TB combined) → ext4 filesystem → mounted at /srv/dev-disk-by-uuid-7484b0c4-762f-440d-b76b-5443b3223edf. UUID: 7484b0c4-762f-440d-b76b-5443b3223edf. Current usage: 633GB used / 3.0TB available (18% full). OMV data shared folder root: /srv/dev-disk-by-uuid-7484b0c4-762f-440d-b76b-5443b3223edf/. fstab entry: /dev/disk/by-uuid/7484b0c4... /srv/... ext4 defaults,nofail,user_xattr,usrquota,grpquota,acl 0 2.",
+      "tags": [
+        "storage",
+        "raid0",
+        "bcache",
+        "nvme",
+        "md0",
+        "ext4",
+        "filesystem",
+        "lsblk",
+        "uuid"
+      ],
+      "context_pages": [
+        "/storage/filesystems",
+        "/storage/md"
+      ],
+      "related_ids": [
+        "sys-hardware-actual",
+        "sys-raid-actual",
+        "omv-filesystems"
+      ]
+    },
+    {
+      "id": "sys-raid-actual",
+      "topic": "This System",
+      "title": "This System: RAID0 Array (md0)",
+      "content": "Software RAID configuration on this system: md0 = active RAID0 (striping, no redundancy). Members: /dev/nvme0n1 (WD Blue SN5000 2TB, slot 0) + /dev/nvme3n1 (KINGSTON SNV3S2000G 1.8T, slot 1). Total capacity: 3,906,764,800 blocks (3.6TB), 512k chunk size, super 1.2. Status check: cat /proc/mdstat. Detail: sudo mdadm --detail /dev/md0. IMPORTANT: RAID0 has NO redundancy — if either nvme0n1 or nvme3n1 fails, ALL data is lost. No automatic rebuild possible. Backup is critical. The nvme1n1 (WD_BLACK SN850X) serves as bcache cache layer on top of md0, NOT as a RAID redundancy device. To check bcache status: cat /sys/block/bcache0/bcache/state. bcache modes: writeback (default, fast but data loss on power cut without flush), writethrough (safe, slower), none (cache disabled).",
+      "tags": [
+        "raid0",
+        "md0",
+        "mdadm",
+        "stripe",
+        "nvme",
+        "bcache",
+        "redundancy",
+        "no-redundancy"
+      ],
+      "context_pages": [
+        "/storage/md"
+      ],
+      "related_ids": [
+        "sys-storage-actual",
+        "omv-md-raid",
+        "safety-destructive-ops"
+      ]
+    },
+    {
+      "id": "sys-bcache-actual",
+      "topic": "This System",
+      "title": "This System: bcache Cache Layer",
+      "content": "bcache (Block Cache) is active on this system. /dev/nvme1n1 (WD_BLACK SN850X 2000GB — fast NVMe) caches reads/writes to /dev/md0 (WD Blue + Kingston RAID0 — slower NVMe). bcache device: /dev/bcache0. Check cache status: cat /sys/block/bcache0/bcache/state (should be 'clean'). Check stats: ls /sys/block/bcache0/bcache/stats_total/. Cache modes: writeback (data written to cache first, flushed to backing device later — faster but risk of data loss on sudden power cut), writethrough (written to both simultaneously — safe), none (bypass cache). Check current mode: cat /sys/block/bcache0/bcache/cache_mode. Change mode: echo writeback > /sys/block/bcache0/bcache/cache_mode. Cache hit rate: cat /sys/block/bcache0/bcache/stats_total/cache_hit_ratio. Bcache is managed at the kernel block layer — OMV's file system management sees bcache0 as a regular block device.",
+      "tags": [
+        "bcache",
+        "cache",
+        "nvme",
+        "sn850x",
+        "writeback",
+        "writethrough",
+        "block-cache"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "sys-storage-actual",
+        "sys-raid-actual"
+      ]
+    },
+    {
+      "id": "sys-network-actual",
+      "topic": "This System",
+      "title": "This System: Network Configuration",
+      "content": "Network on this system: Hostname: raspberrypi. Active interface: eth1 (UP) with IP 10.3.40.14/28, IPv6: 2606:6d00:39f:4501:6ebf:b5ff:fe03:5524/64. Default gateway: 10.3.40.1 (via eth1). Subnet: 10.3.40.0/28 (14 usable hosts, .1-.14). eth0: DOWN (second Ethernet port, unused). wlan0: DOWN (WiFi disabled). Docker bridge: docker0 at 172.17.0.1/16, br-ccd07988c1a3 at 172.18.0.1/16 (Docker bridge networks). Access OMV web UI: https://10.3.40.14 or http://10.3.40.14 (redirects to HTTPS). SSH access: ssh pi@10.3.40.14 or ssh root@10.3.40.14 (port 22). Samba shares accessible at: \\\\10.3.40.14\\Backup from Windows or smb://10.3.40.14/Backup from macOS/Linux. To change IP: System > Network > Interfaces > edit eth1.",
+      "tags": [
+        "network",
+        "ip",
+        "ethernet",
+        "eth1",
+        "gateway",
+        "dns",
+        "subnet",
+        "interface",
+        "10.3.40.14"
+      ],
+      "context_pages": [
+        "/network/interfaces",
+        "/network/general"
+      ],
+      "related_ids": [
+        "omv-network",
+        "sys-hardware-actual"
+      ]
+    },
+    {
+      "id": "sys-smb-actual",
+      "topic": "This System",
+      "title": "This System: Samba Share (Backup)",
+      "content": "Samba share configured on this system: Share name: 'Backup'. Path: /srv/dev-disk-by-uuid-7484b0c4-762f-440d-b76b-5443b3223edf/Backup/. Read-only: no (read-write). Guest access: no (authentication required). Browseable: yes. Apple Time Machine: ENABLED (fruit:time machine = yes) — this share is configured for macOS Time Machine backups. Protocol: SMB3_00 minimum. WORKGROUP domain. Multi-channel support enabled. Access from Windows: \\\\10.3.40.14\\Backup. Access from macOS: smb://10.3.40.14/Backup (also auto-discovers via Bonjour for Time Machine). Access from Linux: smbclient //10.3.40.14/Backup -U pi or mount -t cifs //10.3.40.14/Backup /mnt -o username=pi,vers=3.0. Samba config file: /etc/samba/smb.conf (auto-generated by OMV — do not edit directly, use OMV web UI). To check current connections: sudo smbstatus.",
+      "tags": [
+        "samba",
+        "smb",
+        "backup",
+        "share",
+        "time-machine",
+        "apple",
+        "timemachine",
+        "cifs",
+        "workgroup"
+      ],
+      "context_pages": [
+        "/services/smb"
+      ],
+      "related_ids": [
+        "omv-smb",
+        "sys-network-actual"
+      ]
+    },
+    {
+      "id": "sys-docker-containers",
+      "topic": "This System",
+      "title": "This System: Docker Containers Running",
+      "content": "Docker containers currently running on this system: 1) uptime-kuma — Image: louislam/uptime-kuma:1. Port: 3001 (http://10.3.40.14:3001). Purpose: uptime/service monitoring dashboard. Status: Up 15+ hours, healthy. 2) openspeedtest — Image: openspeedtest/latest. Port: 8800 → 3000 (http://10.3.40.14:8800). Purpose: local network speed test server. Status: Up 15+ hours. 3) n8n (n8n-n8n-1) — Image: n8nio/n8n. Port: 5678 (http://10.3.40.14:5678). Purpose: workflow automation platform. Status: Up 15+ hours. Docker data stored in /var/lib/docker/. Container storage: overlay2 filesystem on /dev/nvme2n1p2 (OS drive). Commands: docker ps (list running), docker ps -a (all), docker logs <name> (view logs), docker compose up -d (start via compose), docker compose down (stop). Docker bridge networks: docker0 (172.17.0.0/16), br-ccd07988c1a3 (172.18.0.0/16).",
+      "tags": [
+        "docker",
+        "containers",
+        "uptime-kuma",
+        "openspeedtest",
+        "n8n",
+        "portainer",
+        "monitoring",
+        "automation"
+      ],
+      "context_pages": [
+        "/system/plugins"
+      ],
+      "related_ids": [
+        "omv-docker",
+        "sys-network-actual"
+      ]
+    },
+    {
+      "id": "sys-pihole-actual",
+      "topic": "This System",
+      "title": "This System: Pi-hole DNS Ad Blocker",
+      "content": "Pi-hole is running on this system as a native service (not Docker container). Service: pihole-FTL.service (Pi-hole FTL DNS resolver). Status: running. Pi-hole blocks DNS requests for ad/tracker domains. DNS server on this system: 10.3.40.14 (Pi-hole handles DNS for the 10.3.40.0/28 subnet when configured as DNS on router/clients). Pi-hole admin UI: http://10.3.40.14/admin. Configure clients/router to use 10.3.40.14 as their DNS server to benefit from blocking. Pi-hole config: /etc/pihole/. Logs: journalctl -u pihole-FTL. Update Pi-hole: pihole -up. Check status: pihole status. Whitelist domain: pihole --white <domain>. Blacklist: pihole --black <domain>. Check query log: pihole -t (tail live log). Note: Pi-hole DNS port 53 must be available — check if anything else uses port 53: ss -tulpn | grep :53.",
+      "tags": [
+        "pihole",
+        "dns",
+        "ad-block",
+        "pi-hole",
+        "ftl",
+        "blocking",
+        "dns-server"
+      ],
+      "context_pages": [],
+      "related_ids": [
+        "sys-network-actual",
+        "omv-network"
+      ]
+    },
+    {
+      "id": "sys-temperature-monitoring",
+      "topic": "This System",
+      "title": "This System: Temperature Monitoring (All Drives + CPU)",
+      "content": "Temperature monitoring on this system. CPU (Raspberry Pi 5): cat /sys/class/thermal/thermal_zone0/temp → divide by 1000 for °C. Idle: ~29°C. Concern threshold: >80°C. NVMe drives (live probe available — ask the agent): /dev/nvme0n1 WD Blue SN5000 2TB: ~29°C (idle). /dev/nvme1n1 WD_BLACK SN850X 2000GB: ~35°C (bcache = more active). /dev/nvme2n1 KINGSTON OM8SGP4512K2: check with sudo nvme smart-log /dev/nvme2n1. /dev/nvme3n1 KINGSTON SNV3S2000G: check with sudo nvme smart-log /dev/nvme3n1. All temps checked via nvme smart-log and smartctl. Safe NVMe range: 0–70°C normal operation, >75°C throttle warning. SMART data: sudo smartctl -A /dev/nvmeXnY. The omv-agent-probe.service refreshes all drive temperatures every 30 seconds automatically — just ask 'what is the temperature of /dev/nvme0n1'.",
+      "tags": [
+        "temperature",
+        "nvme",
+        "smart",
+        "cpu",
+        "thermal",
+        "monitoring",
+        "pi5",
+        "celsius"
+      ],
+      "context_pages": [
+        "/storage/smart",
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "sys-storage-actual",
+        "omv-smart",
+        "sys-hardware-actual"
+      ]
+    },
+    {
+      "id": "sys-filesystem-actual",
+      "topic": "This System",
+      "title": "This System: Filesystem Layout and Disk Usage",
+      "content": "Filesystem layout on this system: / (root): /dev/nvme2n1p2 (KINGSTON 476.9GB), 470GB total, 9.0GB used (2%), ext4, noatime. /boot/firmware: /dev/nvme2n1p1 (512MB), 510MB total, 72MB used (14%), vfat. /srv/dev-disk-by-uuid-7484b0c4...: /dev/bcache0 (bcache over RAID0 md0), 3.6TB total, 633GB used (18%), 3.0TB available, ext4. /dev/shm: 8GB tmpfs (RAM disk for shared memory). /tmp: 16GB tmpfs (RAM-backed temp storage). /run: 3.2GB tmpfs. Swap: 2GB zram (compressed RAM swap, no physical swap partition). Key paths: OMV data root: /srv/dev-disk-by-uuid-7484b0c4-762f-440d-b76b-5443b3223edf/. Samba Backup share: /srv/dev-disk-by-uuid-7484b0c4-762f-440d-b76b-5443b3223edf/Backup/. Docker data: /var/lib/docker/ (on OS drive nvme2n1p2). Check live usage: df -h (or ask the agent 'what is my disk space?').",
+      "tags": [
+        "filesystem",
+        "disk-usage",
+        "df",
+        "ext4",
+        "bcache0",
+        "nvme",
+        "root",
+        "srv",
+        "usage"
+      ],
+      "context_pages": [
+        "/storage/filesystems"
+      ],
+      "related_ids": [
+        "sys-storage-actual",
+        "omv-filesystems"
+      ]
+    },
+    {
+      "id": "sys-services-running",
+      "topic": "This System",
+      "title": "This System: Running Services",
+      "content": "Key services running on this system: docker.service — Docker Engine, manages containers (uptime-kuma, openspeedtest, n8n). nginx.service — Web server, serves OMV web UI and proxies omv-agent. omv-agent-probe.service — OMV Agent live data probe, runs as root, refreshes every 30s. omv-agent.service — OMV Agent helper backend (Flask on 127.0.0.1:11111). pihole-FTL.service — Pi-hole DNS ad blocker. ssh.service — OpenBSD SSH server on port 22. Other expected OMV services: openmediavault-engined.service (RPC handler), salt-minion.service (config management), collectd.service (performance monitoring), smbd.service (Samba), nmbd.service (NetBIOS). Check any service: systemctl status <service-name>. View logs: journalctl -u <service-name> -f. All services listed: systemctl list-units --type=service --state=running.",
+      "tags": [
+        "services",
+        "systemctl",
+        "running",
+        "docker",
+        "nginx",
+        "pihole",
+        "ssh",
+        "omv-agent",
+        "collectd"
+      ],
+      "context_pages": [
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "sys-docker-containers",
+        "sys-pihole-actual",
+        "omv-salt-apply"
+      ]
+    },
+    {
+      "id": "sys-ssh-actual",
+      "topic": "This System",
+      "title": "This System: SSH Access",
+      "content": "SSH is enabled on this system on port 22. SSH service: ssh.service (OpenBSD SSH server). Connect: ssh pi@10.3.40.14 or ssh root@10.3.40.14. The user 'pi' has sudo access (010_pi-nopasswd sudoers rule). SSH configuration managed via OMV at Services > SSH (/services/ssh). Current SSH config in /etc/ssh/sshd_config (managed by omv-salt). SSH key-based auth: add public keys via OMV Users management (Users > pi > SSH public keys). OMV SSH RPC: SshMgmt (get, set, getStats). Disable password auth: in OMV Services > SSH, toggle 'Password Authentication' off (forces key-only). To change SSH port: Services > SSH > Port. After changes, click Apply to run omv-salt deploy run sshd. Emergency recovery: physical console or HDMI+keyboard on the Pi.",
+      "tags": [
+        "ssh",
+        "openssh",
+        "port-22",
+        "remote-access",
+        "pi",
+        "root",
+        "keys",
+        "sshd"
+      ],
+      "context_pages": [
+        "/services/ssh"
+      ],
+      "related_ids": [
+        "omv-ssh",
+        "sys-network-actual",
+        "omv-reset-admin-password"
+      ]
+    },
+    {
+      "id": "sys-load-memory-check",
+      "topic": "This System",
+      "title": "This System: Load, Memory, and Performance",
+      "content": "Performance baseline on this system (Raspberry Pi 5, 16GB RAM, 4-core ARM): Normal load average: 1.5-2.5 (4 cores, so up to 4.0 before saturation). Memory total: 16GB. Typical idle usage: 2-3GB used, 12-13GB available. Swap: 2GB zram (compressed swap, rarely needed with 16GB RAM). CPU frequency: Cortex-A76 @ up to 2.4GHz, frequency scales with load (schedutil governor). Live check: the OMV Agent can report live values — ask 'what is the current system load?' or 'how much memory is in use?'. Manual commands: uptime (load averages), free -h (memory), top (live process list), htop (interactive), vmstat 1 3 (memory/cpu/io statistics). Docker containers add ~0.5-1.0 to load average when active. High load (>4.0 sustained): check docker ps, journalctl -xe, and iotop for disk I/O bottlenecks.",
+      "tags": [
+        "load",
+        "memory",
+        "ram",
+        "performance",
+        "cpu",
+        "uptime",
+        "free",
+        "top",
+        "zram",
+        "swap"
+      ],
+      "context_pages": [
+        "/diagnostics/performance-statistics",
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "sys-hardware-actual",
+        "omv-monitoring"
+      ]
+    },
+    {
+      "id": "sys-omvextras-status",
+      "topic": "This System",
+      "title": "This System: omv-extras and Installed Plugins",
+      "content": "omv-extras is installed on this system with Docker repository enabled (docker=1). Installed OMV packages (dpkg -l | grep openmediavault): openmediavault (core), openmediavault-omvextrasorg (omv-extras), openmediavault-agent (this OMV Agent plugin). Docker CE is installed via Docker's official apt repository (enabled by omv-extras). Plugin page: System > Plugins (/system/plugins). omv-extras page: System > omv-extras (/system/omvextras). To install new plugins: System > Plugins > search > Install. Available community plugins (requires omv-extras): openmediavault-compose (Docker Compose + Portainer), openmediavault-mergerfs, openmediavault-snapraid, openmediavault-zfs, openmediavault-luksencryption, openmediavault-flashmemory (recommended for SD/NVMe OS drives — uses log2ram). Flash memory plugin would help reduce wear on /dev/nvme2n1p2 by keeping logs in RAM.",
+      "tags": [
+        "omv-extras",
+        "plugins",
+        "docker",
+        "installed",
+        "compose",
+        "mergerfs",
+        "flashmemory"
+      ],
+      "context_pages": [
+        "/system/plugins",
+        "/system/omvextras"
+      ],
+      "related_ids": [
+        "omv-extras",
+        "omv-plugins",
+        "omv-docker"
+      ]
+    },
+    {
+      "id": "sys-monitoring-enabled",
+      "topic": "This System",
+      "title": "This System: Monitoring and Graphs",
+      "content": "collectd is enabled on this system for performance monitoring. Graphs available at Diagnostics > Performance Statistics (/diagnostics/performance-statistics). Sub-pages: CPU, Memory, System Load, Uptime, Network interfaces, Disk Usage. RRD data stored in /var/lib/collectd/rrd/. Real-time system info at Diagnostics > System Information (/diagnostics/system-information) shows: CPU model, cores, frequency, RAM, kernel, OMV version, uptime. For live current values, the OMV Agent probe can report instantly — ask: 'current load', 'memory usage', 'temperature of nvme0n1'. External monitoring also running: uptime-kuma container at http://10.3.40.14:3001 — provides uptime monitoring for services. openspeedtest container at http://10.3.40.14:8800 — local network speed testing.",
+      "tags": [
+        "monitoring",
+        "collectd",
+        "graphs",
+        "rrd",
+        "performance",
+        "uptime-kuma",
+        "diagnostics"
+      ],
+      "context_pages": [
+        "/diagnostics/performance-statistics",
+        "/system/monitoring"
+      ],
+      "related_ids": [
+        "omv-monitoring",
+        "sys-docker-containers"
+      ]
+    },
+    {
+      "id": "sys-users-actual",
+      "topic": "This System",
+      "title": "This System: Users and Groups",
+      "content": "Users configured on this system: pi (UID 1000) — primary user, member of groups: pi, pihole, users. Has sudo access (NOPASSWD via /etc/sudoers.d/010_pi-nopasswd). www-data — web server user, runs nginx and omv-agent (UID 33). root — superuser (UID 0). Groups of note: pi (GID 1000), pihole (for Pi-hole access), users (standard NAS group for shared folder access), docker (would need adding pi to docker group to run docker without sudo). OMV user management: Users > Users (/usermgmt/users). Add user to shared folder: Users > Users > select user > configure Shared Folder Privileges. Change password: Users > Users > select user > edit > set password. The admin user (OMV web UI admin) is separate from Linux accounts — reset via omv-firstaid if locked out.",
+      "tags": [
+        "users",
+        "pi",
+        "www-data",
+        "groups",
+        "sudo",
+        "uid",
+        "accounts",
+        "permissions"
+      ],
+      "context_pages": [
+        "/usermgmt/users",
+        "/usermgmt/groups"
+      ],
+      "related_ids": [
+        "omv-user-management",
+        "sys-ssh-actual"
+      ]
+    },
+    {
+      "id": "sys-webui-ssl",
+      "topic": "This System",
+      "title": "This System: OMV Web UI SSL Certificate",
+      "content": "The OMV web UI on this system uses a self-signed SSL certificate: CN=10.3.40.14, CA=true, expires 2027-02-17. HTTPS URL: https://10.3.40.14 (port 443). Browsers will show a security warning for self-signed certificates — click 'Advanced' > 'Accept Risk' or add an exception. Certificate location: /etc/ssl/ (managed by OMV). To replace with a proper certificate: System > Certificates > SSL > Import (paste your cert + key in PEM format). After importing: System > Workbench > HTTPS Certificate > select the new cert > Save > Apply. Let's Encrypt is an option if your NAS has a public domain name (requires OMV plugin or manual certbot setup). For LAN-only use, the self-signed cert is normal and safe — just add the exception once per browser/device.",
+      "tags": [
+        "ssl",
+        "https",
+        "certificate",
+        "self-signed",
+        "browser",
+        "warning",
+        "10.3.40.14"
+      ],
+      "context_pages": [
+        "/system/certificate/ssl"
+      ],
+      "related_ids": [
+        "omv-certificates",
+        "sys-network-actual"
+      ]
+    },
+    {
+      "id": "sys-pwmfan-actual",
+      "topic": "This System",
+      "title": "This System: PWM Fan Control",
+      "content": "The Raspberry Pi 5 has PWM (Pulse-Width Modulation) fan control available. PWM fan controller: /sys/class/pwm/pwmchip0/. If a Pi 5 official fan is connected to the fan header: /sys/class/pwm/pwmchip0/pwm0/duty_cycle — controls fan speed (0=off, max=full speed). The Pi 5 automatically manages fan speed based on CPU temperature. Temperature zones: /sys/class/thermal/thermal_zone0/temp (CPU temp). Check if fan is running: cat /sys/class/pwm/pwmchip0/pwm0/enable. Fan speed correlates with CPU temperature: <50°C (low speed/off), 50-70°C (medium), >70°C (full speed). OMV does not have a built-in fan control UI — manage via /boot/firmware/config.txt if needed (dtparam=fan_temp0=50000, fan_temp0_hyst=5000, fan_temp0_speed=75). The /sys/class/hwmon/ entries also provide thermal zone data. Pi 5 has active cooling support; typical idle temp on this system: ~29°C.",
+      "tags": [
+        "fan",
+        "pwm",
+        "temperature",
+        "cooling",
+        "pi5",
+        "raspberry-pi",
+        "thermal",
+        "hwmon"
+      ],
+      "context_pages": [
+        "/diagnostics/system-information"
+      ],
+      "related_ids": [
+        "sys-hardware-actual",
+        "sys-temperature-monitoring"
+      ]
+    }
+  ]
+}

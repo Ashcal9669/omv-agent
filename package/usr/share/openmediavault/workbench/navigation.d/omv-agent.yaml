@@ -1,0 +1,9 @@
+version: "1.0"
+type: navigationItem
+data:
+  id: system.omvagent
+  path: System/Agent Helper
+  position: 99
+  text: Agent Helper
+  icon: mdi:robot-outline
+  url: /system/omv-agent

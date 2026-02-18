@@ -1,0 +1,54 @@
+[Unit]
+Description=OMV Agent Watcher — live system observer daemon
+Documentation=https://github.com/openmediavault/omv-agent
+After=omv-agent-probe.service omv-agent.service
+Wants=omv-agent-probe.service
+
+[Service]
+Type=simple
+User=omv-agent-watch
+Group=omv-agent-watch
+SupplementaryGroups=systemd-journal
+WorkingDirectory=/tmp
+
+ExecStart=/usr/bin/python3 /usr/lib/omv-agent/watcher.py
+
+Restart=always
+RestartSec=10
+TimeoutStartSec=15
+TimeoutStopSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=omv-agent-watch
+
+RuntimeDirectory=omv-agent
+RuntimeDirectoryMode=0755
+
+# Maximum hardening — observer only, no execution capability
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+ProtectHome=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# Can write only to event queue directory
+ReadWritePaths=/run/omv-agent
+
+# Strict resource limits
+MemoryMax=32M
+CPUQuota=5%
+LimitNOFILE=512
+
+[Install]
+WantedBy=multi-user.target

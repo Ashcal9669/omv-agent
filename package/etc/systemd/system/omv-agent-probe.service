@@ -1,0 +1,47 @@
+[Unit]
+Description=OMV Agent Probe Cache — live system data collector
+Documentation=https://github.com/openmediavault/omv-agent
+After=network.target
+Before=omv-agent.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/usr/lib/omv-agent
+
+ExecStart=/usr/bin/python3 /usr/lib/omv-agent/probe_cache.py
+
+Restart=always
+RestartSec=5
+TimeoutStartSec=15
+TimeoutStopSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=omv-agent-probe
+
+# Runtime dir
+RuntimeDirectory=omv-agent
+RuntimeDirectoryMode=0755
+
+# Minimal hardening — needs root to read /dev/* for SMART
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+MemoryDenyWriteExecute=yes
+# Needs block device access for SMART/NVMe
+PrivateDevices=no
+# Strict resource limits
+MemoryMax=32M
+CPUQuota=5%
+LimitNOFILE=256
+
+[Install]
+WantedBy=multi-user.target

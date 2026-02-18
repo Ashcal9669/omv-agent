@@ -1,0 +1,78 @@
+#!/bin/bash
+set -e
+
+case "$1" in
+  configure)
+    # Create runtime directory for SQLite brain
+    mkdir -p /var/lib/omv-agent
+    chown www-data:www-data /var/lib/omv-agent
+    chmod 750 /var/lib/omv-agent
+
+    # Create static dir and symlink widget
+    mkdir -p /usr/lib/omv-agent/static
+    cp -f /usr/lib/omv-agent/widget.js /usr/lib/omv-agent/static/widget.js
+    chown -R www-data:www-data /usr/lib/omv-agent
+    chmod 755 /usr/lib/omv-agent          # traversable by omv-agent-watch
+    chmod 640 /usr/lib/omv-agent/*.py
+    chmod 644 /usr/lib/omv-agent/watcher.py   # readable by omv-agent-watch
+    chmod 644 /usr/lib/omv-agent/static/widget.js
+
+    # Set knowledge base permissions
+    if [ -d /usr/share/omv-agent ]; then
+      chown -R root:root /usr/share/omv-agent
+      chmod -R 755 /usr/share/omv-agent
+    fi
+
+    # Sudoers for probe service (read-only hardware access)
+    if [ -f /etc/sudoers.d/omv-agent ]; then
+      chmod 440 /etc/sudoers.d/omv-agent
+    fi
+
+    # Probe cache dir
+    mkdir -p /run/omv-agent
+    chmod 755 /run/omv-agent
+
+    # Create omv-agent-watch user (watcher daemon — observer only)
+    if ! id -u omv-agent-watch >/dev/null 2>&1; then
+      useradd --system --no-create-home --shell /usr/sbin/nologin \
+              --comment "OMV Agent Watcher" omv-agent-watch
+    fi
+    # Add to systemd-journal group for journald read access
+    if getent group systemd-journal >/dev/null 2>&1; then
+      usermod -aG systemd-journal omv-agent-watch
+    fi
+
+    # Enable and start watcher service
+    systemctl daemon-reload
+    systemctl enable omv-agent-watch.service
+    systemctl restart omv-agent-watch.service
+
+    # probe_cache.py runs as root — owned by root
+    chmod 644 /usr/lib/omv-agent/probe_cache.py
+
+    # Enable and start both services
+    systemctl daemon-reload
+    systemctl enable omv-agent-probe.service
+    systemctl enable omv-agent.service
+    systemctl restart omv-agent-probe.service
+    systemctl restart omv-agent.service
+
+    # Reload nginx to pick up new config and sub_filter
+    if nginx -t 2>/dev/null; then
+      systemctl reload nginx
+    else
+      echo "WARNING: nginx config test failed. Skipping reload." >&2
+    fi
+
+    echo "OMV Agent Helper installed successfully."
+    echo "The agent widget will appear on all OMV pages."
+    ;;
+  abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+  *)
+    echo "postinst called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

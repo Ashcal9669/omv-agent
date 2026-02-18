@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+case "$1" in
+  remove|upgrade|deconfigure)
+    # Stop and disable services
+    for svc in omv-agent.service omv-agent-probe.service omv-agent-watch.service; do
+      if systemctl is-active --quiet $svc 2>/dev/null; then
+        systemctl stop $svc
+      fi
+      if systemctl is-enabled --quiet $svc 2>/dev/null; then
+        systemctl disable $svc
+      fi
+    done
+    systemctl daemon-reload
+
+    # Reload nginx to remove sub_filter and proxy config
+    if nginx -t 2>/dev/null; then
+      systemctl reload nginx
+    fi
+    ;;
+  failed-upgrade)
+    ;;
+  *)
+    echo "prerm called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

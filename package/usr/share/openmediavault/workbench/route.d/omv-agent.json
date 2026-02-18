@@ -1,0 +1,43 @@
+[
+  {
+    "url": "/system/omv-agent",
+    "title": "Agent Helper",
+    "editing": false,
+    "notificationTitle": "",
+    "data": {
+      "type": "formPage",
+      "config": {
+        "fields": [
+          {
+            "type": "paragraph",
+            "text": "The OMV Agent Helper is a floating assistant available on every page of this interface. Click the robot icon in the bottom-right corner to open it."
+          },
+          {
+            "type": "divider",
+            "title": "Status"
+          },
+          {
+            "type": "textInput",
+            "name": "status",
+            "label": "Service Status",
+            "value": "Check: systemctl status omv-agent",
+            "readonly": true
+          },
+          {
+            "type": "divider",
+            "title": "About"
+          },
+          {
+            "type": "paragraph",
+            "text": "The Agent Helper provides context-aware assistance for NAS management, Linux filesystem operations, and OpenMediaVault configuration. It runs entirely offline — no data leaves your NAS. All system change suggestions require your explicit confirmation before being shown."
+          }
+        ],
+        "buttons": [],
+        "request": {
+          "service": "OmvAgent",
+          "get": { "method": "getSettings" }
+        }
+      }
+    }
+  }
+]

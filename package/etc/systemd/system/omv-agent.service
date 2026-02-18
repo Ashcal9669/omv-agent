@@ -1,0 +1,60 @@
+[Unit]
+Description=OMV Agent Helper Backend
+Documentation=https://github.com/openmediavault/omv-agent
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/usr/lib/omv-agent
+
+ExecStartPre=/usr/bin/python3 /usr/lib/omv-agent/app.py --init-db
+ExecStart=/usr/bin/python3 /usr/lib/omv-agent/app.py
+
+Restart=always
+RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=omv-agent
+
+# Environment
+Environment=OMV_AGENT_PORT=11111
+Environment=OMV_AGENT_DB=/var/lib/omv-agent/brain.db
+Environment=OMV_AGENT_KNOWLEDGE=/usr/share/omv-agent/knowledge/knowledge_base.json
+
+# Security hardening — MED-6: Full systemd isolation
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RemoveIPC=yes
+# Drop ALL capabilities — www-data needs none
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# Only these paths are writable
+ReadWritePaths=/var/lib/omv-agent
+
+# Resource limits
+LimitNOFILE=1024
+LimitNPROC=64
+MemoryMax=128M
+CPUQuota=25%
+
+[Install]
+WantedBy=multi-user.target

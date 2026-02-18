@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!--
+  OMV Agent Widget — HTML Template
+  Vanilla HTML, zero external dependencies. All SVGs inline.
+  This file is a reference template — the widget.js injects
+  equivalent markup directly into the OMV Angular shell body.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMV Agent Widget</title>
+  <link rel="stylesheet" href="widget.css" />
+</head>
+<body>
+
+<!-- ================================================================
+     OMV AGENT WIDGET ROOT
+================================================================= -->
+<div id="omv-agent-root" data-omv-agent="root" aria-live="polite" aria-atomic="false">
+
+  <!-- Backdrop overlay -->
+  <div class="omv-agent-overlay" id="omv-agent-overlay" data-omv-agent="overlay" aria-hidden="true" role="presentation"></div>
+
+  <!-- Floating Action Button -->
+  <button
+    class="omv-agent-fab"
+    id="omv-agent-fab"
+    data-omv-agent="fab"
+    type="button"
+    aria-label="Open OMV Assistant"
+    aria-controls="omv-agent-panel"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    title="OMV Assistant"
+  >
+    <span class="omv-agent-fab__icon" aria-hidden="true">
+      <!-- Robot icon — inline SVG, no external deps -->
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <rect x="5" y="9" width="18" height="14" rx="3" fill="white" opacity="0.95"/>
+        <circle cx="10.5" cy="15" r="2" fill="#0d7ab3"/>
+        <circle cx="17.5" cy="15" r="2" fill="#0d7ab3"/>
+        <circle cx="11.2" cy="14.3" r="0.6" fill="white"/>
+        <circle cx="18.2" cy="14.3" r="0.6" fill="white"/>
+        <rect x="9.5" y="19.5" width="9" height="1.5" rx="0.75" fill="#0d7ab3" opacity="0.7"/>
+        <rect x="13" y="5" width="2" height="4" rx="1" fill="white" opacity="0.9"/>
+        <circle cx="14" cy="4.5" r="1.5" fill="white"/>
+        <rect x="3" y="12" width="2.5" height="5" rx="1.25" fill="white" opacity="0.7"/>
+        <rect x="22.5" y="12" width="2.5" height="5" rx="1.25" fill="white" opacity="0.7"/>
+      </svg>
+    </span>
+  </button>
+
+  <!-- Side Panel -->
+  <aside
+    class="omv-agent-panel"
+    id="omv-agent-panel"
+    data-omv-agent="panel"
+    role="dialog"
+    aria-label="OMV Assistant"
+    aria-modal="false"
+    tabindex="-1"
+  >
+
+    <!-- Panel Header -->
+    <header class="omv-agent-panel__header" data-omv-agent="panel-header">
+      <div class="omv-agent-panel__logo-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <rect x="2" y="3"  width="16" height="5" rx="1.5" fill="white" opacity="0.9"/>
+          <rect x="2" y="10" width="16" height="5" rx="1.5" fill="white" opacity="0.9"/>
+          <circle cx="14.5" cy="5.5"  r="1" fill="#0d7ab3"/>
+          <circle cx="14.5" cy="12.5" r="1" fill="#0d7ab3"/>
+          <rect x="4" y="4.5"  width="7" height="2" rx="0.5" fill="white" opacity="0.5"/>
+          <rect x="4" y="11.5" width="7" height="2" rx="0.5" fill="white" opacity="0.5"/>
+          <rect x="4" y="17" width="12" height="1.5" rx="0.75" fill="white" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="omv-agent-panel__title-group">
+        <p class="omv-agent-panel__title" data-omv-agent="panel-title">OMV Assistant</p>
+        <p class="omv-agent-panel__subtitle" data-omv-agent="panel-subtitle">NAS &amp; Linux helper</p>
+      </div>
+      <div class="omv-agent-panel__status-dot" id="omv-agent-status-dot" data-omv-agent="status-dot" data-status="ready" aria-hidden="true" title="Assistant ready"></div>
+      <button
+        class="omv-agent-panel__close"
+        id="omv-agent-panel-close"
+        data-omv-agent="panel-close"
+        type="button"
+        aria-label="Close OMV Assistant"
+      >
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Context Bar -->
+    <div
+      class="omv-agent-context-bar"
+      id="omv-agent-context-bar"
+      data-omv-agent="context-bar"
+      data-section="dashboard"
+      aria-label="Current context"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <svg class="omv-agent-context-bar__icon" id="omv-agent-ctx-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.8"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor" opacity="0.8"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor" opacity="0.8"/>
+      </svg>
+      <span class="omv-agent-context-bar__dot" aria-hidden="true"></span>
+      <span class="omv-agent-context-bar__crumb" id="omv-agent-ctx-crumb">Dashboard</span>
+      <span class="omv-agent-context-bar__section" id="omv-agent-ctx-section"></span>
+    </div>
+
+    <!-- Messages -->
+    <div class="omv-agent-messages" id="omv-agent-messages" data-omv-agent="messages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions">
+      <div class="omv-agent-messages__separator" role="separator" aria-label="Start of conversation">Today</div>
+      <div class="omv-agent-message omv-agent-message--agent" data-omv-agent="message" data-message-id="welcome" data-role="agent" role="article" aria-label="Assistant message">
+        <div class="omv-agent-message__bubble" data-omv-agent="bubble">
+          Hello! I'm your OMV Assistant. I can help with NAS management, Linux filesystems,
+          disk operations, network shares, and OMV settings.<br><br>
+          <strong>I only answer OMV/NAS/Linux questions</strong> — ask me anything about your system!
+        </div>
+        <div class="omv-agent-message__meta" aria-label="Sent">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+            <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+          </svg>
+          <time data-omv-agent="msg-time">Just now</time>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="omv-agent-typing" id="omv-agent-typing" data-omv-agent="typing" aria-hidden="true" aria-label="Assistant is typing" role="status" style="margin: 0 14px 10px;">
+      <span class="omv-agent-typing__dot" aria-hidden="true"></span>
+      <span class="omv-agent-typing__dot" aria-hidden="true"></span>
+      <span class="omv-agent-typing__dot" aria-hidden="true"></span>
+    </div>
+
+    <!-- Input Area -->
+    <div class="omv-agent-input-area" id="omv-agent-input-area" data-omv-agent="input-area">
+      <div class="omv-agent-input-area__row">
+        <textarea
+          class="omv-agent-textarea"
+          id="omv-agent-textarea"
+          data-omv-agent="textarea"
+          placeholder="Ask about your server…"
+          rows="1"
+          maxlength="500"
+          aria-label="Message to OMV Assistant"
+          aria-describedby="omv-agent-input-hint"
+          aria-controls="omv-agent-messages"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="sentences"
+          spellcheck="true"
+        ></textarea>
+        <button class="omv-agent-send-btn" id="omv-agent-send-btn" data-omv-agent="send-btn" type="button" disabled aria-label="Send message" title="Send (Enter)">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M2.5 9L15.5 9M15.5 9L10.5 4M15.5 9L10.5 14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <p class="omv-agent-input-area__hint" id="omv-agent-input-hint" aria-hidden="true">
+        <kbd>Enter</kbd> to send &middot; <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line &middot; <kbd>Esc</kbd> to close
+      </p>
+    </div>
+
+  </aside>
+
+  <!-- Warning Dialog -->
+  <div
+    class="omv-agent-warning-overlay"
+    id="omv-agent-warning-overlay"
+    data-omv-agent="warning-overlay"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="omv-agent-warning-title"
+    aria-describedby="omv-agent-warning-desc"
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <div class="omv-agent-warning-dialog" id="omv-agent-warning-dialog">
+      <div class="omv-agent-warning-dialog__header">
+        <div class="omv-agent-warning-dialog__icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M9 2L16.5 15H1.5L9 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M9 7.5V10.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+            <circle cx="9" cy="13" r="0.9" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="omv-agent-warning-dialog__title" id="omv-agent-warning-title">System Change Warning</h2>
+          <p class="omv-agent-warning-dialog__subtitle">Review carefully before proceeding</p>
+        </div>
+      </div>
+      <div class="omv-agent-warning-dialog__body">
+        <p class="omv-agent-warning-dialog__description" id="omv-agent-warning-desc" data-omv-agent="warning-desc">
+          This suggestion involves a system-level change. The assistant cannot execute anything —
+          you must run any commands yourself.
+        </p>
+        <pre class="omv-agent-warning-dialog__command" id="omv-agent-warning-command" data-omv-agent="warning-command" aria-label="Suggestion content" role="region"><code></code></pre>
+        <div class="omv-agent-warning-dialog__impact" id="omv-agent-warning-impact" data-omv-agent="warning-impact">
+          This action may affect running services or data. Ensure you have a backup before proceeding.
+        </div>
+      </div>
+      <div class="omv-agent-warning-dialog__footer">
+        <button class="omv-agent-warning-btn omv-agent-warning-btn--cancel" id="omv-agent-warning-cancel" data-omv-agent="warning-cancel" type="button">Cancel</button>
+        <button class="omv-agent-warning-btn omv-agent-warning-btn--confirm" id="omv-agent-warning-confirm" data-omv-agent="warning-confirm" type="button">Show Suggestion</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#omv-agent-root -->
+
+<!-- Message template (cloned by JS) -->
+<template id="omv-agent-tmpl-message">
+  <div class="omv-agent-message" data-omv-agent="message" data-message-id="" data-role="" role="article">
+    <div class="omv-agent-message__bubble" data-omv-agent="bubble"></div>
+    <div class="omv-agent-message__meta">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+        <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+      <time data-omv-agent="msg-time"></time>
+    </div>
+  </div>
+</template>
+
+<script src="widget.js" defer></script>
+</body>
+</html>

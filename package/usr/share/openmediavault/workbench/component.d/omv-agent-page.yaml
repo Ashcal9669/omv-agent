@@ -1,0 +1,19 @@
+version: "1.0"
+type: component
+data:
+  name: omv-agent-page
+  type: formPage
+  config:
+    fields:
+      - type: paragraph
+        text: >
+          The OMV Agent Helper is available as a floating widget on every page.
+          Look for the robot icon (🤖) in the bottom-right corner of your screen.
+      - type: divider
+        title: Service Status
+      - type: textInput
+        name: version
+        label: Plugin Version
+        value: "1.0.0"
+        readonly: true
+    buttons: []

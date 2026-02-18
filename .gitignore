@@ -1,0 +1,30 @@
+# Built packages
+dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# SQLite runtime DB (lives in /var/lib/omv-agent at runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets / env
+.env
+*.key
+*.pem
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
