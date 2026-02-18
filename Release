@@ -1,0 +1,14 @@
+Origin: Ashcal9669
+Label: omv-agent
+Suite: stable
+Codename: stable
+Date: Wed, 18 Feb 2026 10:58:33 +0000
+Architectures: all arm64 amd64
+Components: ./
+Description: OMV Agent Helper apt repository
+MD5Sum:
+ 3b888cd3bad512068039c939894cf98a 1465 Packages
+ 5941ad6a2fd9f5cfe3f24839839f4ada 896 Packages.gz
+SHA256:
+ e49606eac30fb270d8181ea314a3b3abb0305a855af722c2674bede3e4d58f63 1465 Packages
+ 63d3c8f1c5fec69c22be907795b4e2c6fa759d68f9445bde96677d3d24e2d105 896 Packages.gz

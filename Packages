@@ -1,0 +1,36 @@
+Package: openmediavault-agent
+Version: 1.2.0
+Architecture: all
+Maintainer: OMV Agent Project <omv-agent@localhost>
+Installed-Size: 256
+Depends: openmediavault (>= 8), python3 (>= 3.9), python3-flask, nginx
+Suggests: python3-pip
+Filename: ./openmediavault-agent_1.2.0_all.deb
+Size: 66748
+MD5sum: 093ad071241905dca8dd9d338f2c7917
+SHA1: 36398eba8ea75613834accc801692512b11bf884
+SHA256: 8aa2822d4afdfd91e2375e66c2e6c194eb961bcd46b82646fe2f9c1284109307
+Section: admin
+Priority: optional
+Homepage: https://github.com/openmediavault
+Description: OMV Intelligent Agent Helper
+ An animated, context-aware assistant for OpenMediaVault 8.
+ .
+ Provides intelligent suggestions for NAS management, Linux filesystem
+ operations, and OMV configuration. Features a safety-first design
+ where all system change suggestions require explicit user confirmation
+ before being shown. The agent cannot execute any commands — it only
+ provides guidance.
+ .
+ Features:
+  - Persistent animated helper widget on every OMV page
+  - Context-aware suggestions based on current OMV section
+  - Built-in Linux filesystem knowledge (ext4, btrfs, XFS, ZFS, NFS, SMB)
+  - Session-scoped deduplication (no repeated answers)
+  - Off-topic rejection (only answers OMV/NAS/Linux questions)
+  - System change warnings with confirmation gate
+  - Live system probes: drive temps, RAID status, load, disk usage
+  - Fully offline — no external API calls
+ .
+ Supports ARM64 and AMD64 (Architecture: all).
+
