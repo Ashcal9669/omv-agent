@@ -188,19 +188,48 @@ def _temp_label(temp: int) -> str:
     return "HOT ❌"
 
 
+def _clean_df(df_raw):
+    """Filter df output - keep only real storage mounts, skip noise."""
+    SKIP_FS = {"tmpfs", "devtmpfs", "udev", "overlay", "squashfs", "none", "cgroupfs"}
+    SKIP_MOUNT_PREFIX = ("/proc", "/sys", "/dev/pts", "/run/user", "/snap")
+    lines = df_raw.strip().splitlines()
+    if not lines:
+        return ""
+    header = lines[0]
+    kept = [header]
+    for line in lines[1:]:
+        parts = line.split()
+        if not parts:
+            continue
+        fs = parts[0].lower()
+        mount = parts[-1] if len(parts) >= 6 else ""
+        if any(fs.startswith(s) for s in SKIP_FS):
+            continue
+        if any(mount.startswith(p) for p in SKIP_MOUNT_PREFIX):
+            continue
+        kept.append(line)
+    return "\n".join(kept)
+
+
+def _fmt_section(title, content):
+    """Format a titled section with unicode divider for plain text display."""
+    divider = "─" * 48
+    return f"{title}\n{divider}\n{content}"
+
+
 def run_probe(probe_type: str, question: str) -> str | None:
     """Read from probe cache and return a formatted answer."""
     cache = _load_cache()
 
     if cache is None:
         return (
-            "**Live data unavailable**\n\n"
+            "Live data unavailable\n\n"
             "The probe service is starting (takes up to 30 seconds after boot).\n\n"
             "Try again shortly, or check manually:\n"
-            "- Load: `cat /proc/loadavg`\n"
-            "- Drive temps: `sudo nvme smart-log /dev/nvme0n1`\n"
-            "- RAID: `cat /proc/mdstat`\n"
-            "- Disk usage: `df -h`"
+            "  Load:        cat /proc/loadavg\n"
+            "  Drive temps: sudo nvme smart-log /dev/nvme0n1\n"
+            "  RAID:        cat /proc/mdstat\n"
+            "  Disk usage:  df -h"
         )
 
     try:
@@ -217,35 +246,38 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 if data and "temperature_c" in data:
                     temp = data["temperature_c"]
                     return (
-                        f"**{device}** — {temp}°C {_temp_label(temp)}\n\n"
+                        f"{device} — {temp}°C {_temp_label(temp)}\n\n"
                         f"Source: {data.get('source', 'probe')} | "
-                        f"Safe range: NVMe 0–70°C"
+                        f"Safe range: NVMe 0-70°C"
                     )
                 elif drives:
-                    lines = [f"- **{d}**: {i.get('temperature_c','?')}°C {_temp_label(i.get('temperature_c',0)) if isinstance(i.get('temperature_c'),int) else ''}"
+                    lines = [f"  {d}: {i.get('temperature_c','?')}°C {_temp_label(i.get('temperature_c',0)) if isinstance(i.get('temperature_c'),int) else ''}"
                              for d, i in sorted(drives.items())]
+                    divider = "─" * 48
                     return (
-                        f"**All Drive Temperatures** (live)\n\n" +
+                        f"All Drive Temperatures  (live)\n{divider}\n" +
                         "\n".join(lines) +
-                        f"\n\n_{device} not found in probe data._"
+                        f"\n\n{device} not found in probe data."
                     )
-                return f"No temperature data for {device}.\n\nManual: `sudo nvme smart-log {device}`"
+                return f"No temperature data for {device}.\n\nManual: sudo nvme smart-log {device}"
             else:
                 # No specific device — show all
                 if drives:
+                    divider = "─" * 48
                     lines = [
-                        f"- **{d}**: {i.get('temperature_c','?')}°C — {_temp_label(i.get('temperature_c',0)) if isinstance(i.get('temperature_c'),int) else '?'}"
+                        f"  {d}: {i.get('temperature_c','?')}°C — {_temp_label(i.get('temperature_c',0)) if isinstance(i.get('temperature_c'),int) else '?'}"
                         for d, i in sorted(drives.items())
                     ]
-                    return "**All Drive Temperatures** (live)\n\n" + "\n".join(lines)
+                    return f"All Drive Temperatures  (live)\n{divider}\n" + "\n".join(lines)
                 return "No drive temperature data available."
 
         # ── RAID / MD arrays ─────────────────────────────────────────────────
         elif probe_type == "raid":
             raid = cache.get("raid", {})
             if raid.get("raid") == "none":
-                return "**RAID Status**\n\nNo software RAID arrays detected."
+                return "RAID Status\n\nNo software RAID arrays detected."
             arrays = raid.get("raid_arrays", {})
+            divider = "─" * 48
             parts = []
             for name, info in arrays.items():
                 detail = info.get("detail", "")
@@ -266,19 +298,20 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 ok = "clean" in state.lower() or "active" in state.lower()
                 icon = "✅" if ok else "⚠️"
                 parts.append(
-                    f"**{name}** {icon}\n"
-                    f"- Level: {level}\n"
-                    f"- State: **{state}**\n"
-                    f"- Size: {size}\n"
-                    f"- Devices: {active}/{total} active, {failed} failed"
+                    f"{name} {icon}\n"
+                    f"  Level:   {level}\n"
+                    f"  State:   {state}\n"
+                    f"  Size:    {size}\n"
+                    f"  Devices: {active}/{total} active, {failed} failed"
                 )
-            return "**Live RAID Status**\n\n" + "\n\n".join(parts)
+            return f"Live RAID Status\n{divider}\n" + f"\n{divider}\n".join(parts)
 
         # ── bcache ───────────────────────────────────────────────────────────
         elif probe_type == "bcache":
             bcache = cache.get("bcache", {})
             if bcache.get("_status") == "no bcache devices found":
-                return "**bcache**\n\nNo bcache devices found on this system."
+                return "bcache\n\nNo bcache devices found on this system."
+            divider = "─" * 48
             parts = []
             for dev, info in bcache.items():
                 if dev == "_status":
@@ -292,52 +325,62 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 mode    = info.get("cache_mode", "unknown")
                 state   = info.get("state", "unknown")
 
-                wb_status = "**ON** ✅" if wb_on else "**OFF** ⏸"
+                wb_status = "ON ✅" if wb_on else "OFF ⏸"
                 parts.append(
-                    f"**{dev}**\n"
-                    f"- Writeback: {wb_status} (running={wb_run})\n"
-                    f"- Cache mode: {mode}\n"
-                    f"- State: {state}\n"
-                    f"- Dirty data: **{dirty}**\n"
-                    f"- Writeback rate: {rate}\n"
-                    f"- Writeback %: {pct} | Sequential cutoff: {cutoff}"
+                    f"{dev}\n"
+                    f"  Writeback:        {wb_status} (running={wb_run})\n"
+                    f"  Cache mode:       {mode}\n"
+                    f"  State:            {state}\n"
+                    f"  Dirty data:       {dirty}\n"
+                    f"  Writeback rate:   {rate}\n"
+                    f"  Writeback %:      {pct}\n"
+                    f"  Sequential cutoff:{cutoff}"
                 )
             if not parts:
-                return "**bcache** — No bcache device info available."
-            return "**bcache Live Status**\n\n" + "\n\n".join(parts)
+                return "bcache — No bcache device info available."
+            return f"bcache Live Status\n{divider}\n" + f"\n{divider}\n".join(parts)
 
         # ── System load / memory ─────────────────────────────────────────────
         elif probe_type == "load":
             s = cache.get("system", {})
+            divider = "─" * 48
             try:
                 load = float(s.get("load_1m", "0"))
                 load_status = "Normal ✅" if load < 3.0 else ("High ⚠️" if load < 3.8 else "Critical ❌")
             except Exception:
                 load_status = ""
             return (
-                f"**System Status** (live)\n\n"
-                f"- Uptime: {s.get('uptime', 'unknown')}\n"
-                f"- Load: **{s.get('load_1m','?')}** (1m) / {s.get('load_5m','?')} (5m) / {s.get('load_15m','?')} (15m) — {load_status}\n\n"
-                f"**Memory:**\n```\n{s.get('memory','unavailable')}\n```\n\n"
-                f"_Pi 5 has 4 cores — load below 4.0 is normal._"
+                f"System Status  (live)\n{divider}\n"
+                f"Uptime: {s.get('uptime', 'unknown')}\n"
+                f"Load:   {s.get('load_1m','?')} (1m) / {s.get('load_5m','?')} (5m) / {s.get('load_15m','?')} (15m) — {load_status}\n\n"
+                f"Memory\n{divider}\n{s.get('memory','unavailable')}\n\n"
+                f"Pi 5 has 4 cores — load below 4.0 is normal."
             )
 
         # ── Disk usage ───────────────────────────────────────────────────────
         elif probe_type == "disk_usage":
             disks = cache.get("disks", {})
-            return f"**Disk Usage** (live)\n\n```\n{disks.get('disk_usage','unavailable')}\n```"
+            divider = "─" * 48
+            clean = _clean_df(disks.get('disk_usage', ''))
+            return f"Disk Usage  (live)\n{divider}\n{clean}"
 
         # ── Filesystem status ────────────────────────────────────────────────
         elif probe_type == "fs_status":
             disks = cache.get("disks", {})
-            df    = disks.get("disk_usage", "")
-            lsblk = disks.get("block_devices", "")
-            parts = ["**Filesystem Status** (live)\n"]
-            if df:
-                parts.append("**Mounted Filesystems:**\n```\n" + df + "\n```")
-            if lsblk:
-                parts.append("**Block Devices:**\n```\n" + lsblk + "\n```")
-            return "\n\n".join(parts)
+            df_raw = disks.get("disk_usage", "")
+            lsblk_raw = disks.get("block_devices", "")
+            parts = ["Filesystem Status  (live)"]
+            divider = "─" * 48
+            parts.append(divider)
+            if df_raw:
+                clean = _clean_df(df_raw)
+                parts.append("Mounted Filesystems:\n")
+                parts.append(clean)
+            if lsblk_raw:
+                parts.append("\nBlock Devices:\n")
+                parts.append(lsblk_raw)
+            parts.append(divider)
+            return "\n".join(parts)
 
         # ── Drive health (all drives) ────────────────────────────────────────
         elif probe_type == "drive_health":
@@ -346,8 +389,9 @@ def run_probe(probe_type: str, question: str) -> str | None:
             anomalies = cache.get("anomalies", [])
 
             if not drives:
-                return "**Drive Health**\n\nNo drive data available yet."
+                return "Drive Health\n\nNo drive data available yet."
 
+            divider = "─" * 48
             all_ok = True
             lines = []
             for dev, info in sorted(drives.items()):
@@ -356,9 +400,9 @@ def run_probe(probe_type: str, question: str) -> str | None:
                     label = _temp_label(temp)
                     if temp >= 65:
                         all_ok = False
-                    lines.append(f"- **{dev}**: {temp}°C — {label}")
+                    lines.append(f"  {dev}: {temp}°C — {label}")
                 else:
-                    lines.append(f"- **{dev}**: ? — No data")
+                    lines.append(f"  {dev}: ? — No data")
 
             # RAID summary
             raid_lines = []
@@ -370,26 +414,32 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 if not ok:
                     all_ok = False
                 icon = "✅" if ok else "⚠️"
-                raid_lines.append(f"- **{name}**: {state} {icon}")
+                raid_lines.append(f"  {name}: {state} {icon}")
 
             summary = "All healthy ✅" if all_ok else "Issues detected ⚠️"
-            result = f"**Drive Health** — {summary}\n\n**Temperatures:**\n" + "\n".join(lines)
+            result = (
+                f"Drive Health — {summary}\n{divider}\n"
+                f"Temperatures:\n" + "\n".join(lines)
+            )
             if raid_lines:
-                result += "\n\n**RAID Arrays:**\n" + "\n".join(raid_lines)
+                result += f"\n\nRAID Arrays:\n" + "\n".join(raid_lines)
 
             drive_alerts = [a for a in anomalies
                             if a.get("type") in ("drive_temp", "raid_degraded", "raid_failed_device")]
             if drive_alerts:
-                result += "\n\n**Active Alerts:**\n" + "\n".join(
-                    f"- {a['msg']}" for a in drive_alerts)
+                result += "\n\nActive Alerts:\n" + "\n".join(
+                    f"  {a['msg']}" for a in drive_alerts)
             return result
 
         # ── Network ──────────────────────────────────────────────────────────
         elif probe_type == "network":
             net = cache.get("network", {})
+            divider = "─" * 48
+            ifaces = net.get('interfaces', 'unavailable')
+            routes = net.get('routes', 'unavailable')
             return (
-                f"**Network Interfaces** (live)\n\n```\n{net.get('interfaces','unavailable')}\n```\n\n"
-                f"**Routes:**\n```\n{net.get('routes','unavailable')}\n```"
+                f"Network Interfaces  (live)\n{divider}\n{ifaces}\n\n"
+                f"Routes\n{divider}\n{routes}"
             )
 
         # ── Service status (specific named service) ──────────────────────────
@@ -442,10 +492,11 @@ def run_probe(probe_type: str, question: str) -> str | None:
                         status = "inactive"   # not in running list → not running
 
                 icon = "✅" if status == "active" else ("❌" if status == "failed" else "⏸")
+                divider = "─" * 40
                 return (
-                    f"**Service: {svc_name}**\n\n"
-                    f"{icon} Status: **{status}**\n\n"
-                    f"_Manual check: `systemctl status {svc_name}`_"
+                    f"Service: {svc_name}\n{divider}\n"
+                    f"{icon}  Status: {status}\n\n"
+                    f"Check: systemctl status {svc_name}"
                 )
             else:
                 # Show all known service statuses
@@ -453,60 +504,66 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 for svc, st in statuses.items():
                     icon = "✅" if st == "active" else ("❌" if st == "failed" else "⏸")
                     lines.append(f"{icon} {svc}: {st}")
-                return "**Key Service Statuses**\n\n" + "\n".join(lines)
+                divider = "─" * 40
+                return f"Key Service Statuses\n{divider}\n" + "\n".join(lines)
 
         # ── System updates ───────────────────────────────────────────────────
         elif probe_type == "updates":
             upd   = cache.get("updates", {})
             count = upd.get("pending_count", -1)
             pkgs  = upd.get("packages", [])
+            divider = "─" * 48
 
             if count == -1:
                 return (
-                    "**System Updates**\n\n"
+                    f"System Updates\n{divider}\n"
                     "Could not check — apt may need a refresh.\n\n"
-                    "Manual: `sudo apt update && apt list --upgradable`"
+                    "Manual: sudo apt update && apt list --upgradable"
                 )
             elif count == 0:
-                return "**System Updates**\n\n✅ System is up to date — no pending updates."
+                return f"System Updates\n{divider}\n✅ System is up to date — no pending updates."
             else:
                 pkg_list = ", ".join(pkgs[:10])
                 more = f" (+{count - 10} more)" if count > 10 else ""
                 return (
-                    f"**System Updates**\n\n"
-                    f"⚠️ **{count} update{'s' if count != 1 else ''} available**\n\n"
-                    f"Packages: `{pkg_list}{more}`\n\n"
-                    f"Apply in OMV: _System → Update Management_\n"
-                    f"Or via SSH: `sudo apt upgrade`"
+                    f"System Updates\n{divider}\n"
+                    f"⚠️  {count} update{'s' if count != 1 else ''} available\n\n"
+                    f"Packages: {pkg_list}{more}\n\n"
+                    f"Apply in OMV: System -> Update Management\n"
+                    f"Or via SSH:   sudo apt upgrade"
                 )
 
         # ── ZFS ──────────────────────────────────────────────────────────────
         elif probe_type == "zfs":
             zfs = cache.get("zfs", {})
+            divider = "─" * 48
             if zfs.get("zfs") == "none":
-                return "**ZFS**\n\nZFS is not configured on this system."
-            return f"**ZFS Pool Status**\n\n```\n{zfs.get('zfs_status','unavailable')}\n```"
+                return "ZFS\n\nZFS is not configured on this system."
+            return f"ZFS Pool Status\n{divider}\n{zfs.get('zfs_status','unavailable')}"
 
         # ── Block device list ─────────────────────────────────────────────────
         elif probe_type == "lsblk":
             disks = cache.get("disks", {})
-            return f"**Block Devices**\n\n```\n{disks.get('block_devices','unavailable')}\n```"
+            divider = "─" * 48
+            return f"Block Devices\n{divider}\n{disks.get('block_devices','unavailable')}"
 
         # ── All running services ──────────────────────────────────────────────
         elif probe_type == "services":
             svcs = cache.get("services", {})
-            return f"**Running Services**\n\n```\n{svcs.get('running_services','unavailable')}\n```"
+            divider = "─" * 48
+            return f"Running Services\n{divider}\n{svcs.get('running_services','unavailable')}"
 
         # ── Anomalies ─────────────────────────────────────────────────────────
         elif probe_type == "anomalies":
             anomalies = cache.get("anomalies", [])
+            divider = "─" * 48
             if not anomalies:
-                return "**System Health**\n\n✅ No anomalies detected. All systems normal."
+                return f"System Health\n{divider}\n✅ No anomalies detected. All systems normal."
             lines = []
             for a in anomalies:
                 icon = "❌" if a.get("level") == "critical" else "⚠️"
                 lines.append(f"{icon} {a.get('msg', '')}")
-            return "**System Anomalies**\n\n" + "\n".join(lines)
+            return f"System Anomalies\n{divider}\n" + "\n".join(lines)
 
     except Exception as e:
         return f"Probe error: {str(e)[:120]}"
