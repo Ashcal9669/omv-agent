@@ -52,6 +52,10 @@ RELEVANT_KEYWORDS = {
     "slow", "error", "fail", "failed", "broken", "corrupt", "repair",
     "interface", "ethernet", "wifi", "wireless", "speed", "duplex",
     "ping", "route", "subnet", "vlan", "bridge", "bond",
+    # Agent self-awareness / capability queries
+    "agent", "capability", "capabilities", "feature", "features",
+    "what can", "what do you", "help me", "yourself", "about you",
+    "version", "changelog",
 }
 
 # Triggers that mark a suggestion as a system change (requires warning)
@@ -240,13 +244,23 @@ class Brain:
         return hashlib.sha256(f"{session_id}:{normalized}".encode()).hexdigest()[:16]
 
     def was_already_answered(self, session_id: str, question_hash: str) -> str | None:
-        """Returns previous answer if already answered this session, else None."""
+        """
+        Returns previous answer if this exact question was answered in the last 3
+        responses this session, else None. Limits dedup window to avoid rejecting
+        legitimate follow-up questions that differ slightly from earlier ones.
+        """
         with self._get_conn() as conn:
-            row = conn.execute("""
-                SELECT answer FROM session_history
-                WHERE session_id = ? AND question_hash = ?
-            """, (session_id, question_hash)).fetchone()
-        return row["answer"] if row else None
+            # Fetch only the 3 most recent question hashes for this session
+            recent = conn.execute("""
+                SELECT question_hash, answer FROM session_history
+                WHERE session_id = ?
+                ORDER BY timestamp DESC
+                LIMIT 3
+            """, (session_id,)).fetchall()
+        for row in recent:
+            if row["question_hash"] == question_hash:
+                return row["answer"]
+        return None
 
     MAX_GLOBAL_HISTORY = 500  # MED-5: SD card exhaustion prevention
 

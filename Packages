@@ -1,15 +1,15 @@
 Package: openmediavault-agent
-Version: 1.4.0
+Version: 1.4.1
 Architecture: all
 Maintainer: OMV Agent Project <omv-agent@localhost>
 Installed-Size: 256
 Depends: openmediavault (>= 8), python3 (>= 3.9), python3-flask, nginx
 Suggests: python3-pip
-Filename: dist/openmediavault-agent_1.4.0_all.deb
-Size: 91460
-MD5sum: b0f4716c82c80e86956a6828f87c7190
-SHA1: 105fff5fdfb5941778ef603e43829b163f0cd386
-SHA256: 12bd65593439d976c2fb7f09320a28359f178ed79632423e806e9206af388d28
+Filename: dist/openmediavault-agent_1.4.1_all.deb
+Size: 107352
+MD5sum: 6a06e0bfeb946d898ba9e54f9b6972a6
+SHA1: f5e13c854048e05bc78c61184bbfb20e6d303bcf
+SHA256: c4ab93fd464eca31c2e108911f4a280495e0e4e1b4a5405e2bb63dbe33d549b3
 Section: admin
 Priority: optional
 Homepage: https://github.com/Ashcal9669/omv-agent

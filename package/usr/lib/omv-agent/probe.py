@@ -49,6 +49,19 @@ def detect_query_type(question: str) -> str | None:
     """
     q = question.lower()
 
+    # ── CPU / SoC temperature (must come BEFORE generic temperature block) ───
+    if any(w in q for w in ("cpu", "processor", "soc", "board temp")):
+        if any(w in q for w in ("temp", "hot", "thermal", "°c", "celsius", "heat", "warm")):
+            return "temperature"
+
+    # ── SMART / drive health routing ─────────────────────────────────────────
+    if "smartctl" in q:
+        return "drive_health"
+    if "smart" in q and any(w in q for w in ("status", "health", "data", "check", "all", "drives", "disk")):
+        return "drive_health"
+    if "drive health" in q:
+        return "drive_health"
+
     # ── Drive temperatures ───────────────────────────────────────────────────
     # Specific device path
     if re.search(r'/dev/(nvme|sd|hd|vd)\w+', q):
@@ -443,12 +456,18 @@ def run_probe(probe_type: str, question: str) -> str | None:
             for dev, info in sorted(drives.items()):
                 temp = info.get("temperature_c", "?")
                 if isinstance(temp, int):
-                    label = _temp_label(temp)
                     if temp >= 65:
                         all_ok = False
-                    lines.append(f"  {dev}: {temp}°C — {label}")
+                    # Health indicator based on temperature thresholds
+                    if temp < 60:
+                        health_icon = "GOOD ✅"
+                    elif temp < 75:
+                        health_icon = "WARNING ⚠️"
+                    else:
+                        health_icon = "CRITICAL ❌"
+                    lines.append(f"• {dev.ljust(14)}  {str(temp) + '°C':>6}   {health_icon}")
                 else:
-                    lines.append(f"  {dev}: ? — No data")
+                    lines.append(f"• {dev.ljust(14)}  {'?':>6}   UNKNOWN ?")
 
             # RAID summary
             raid_lines = []
@@ -476,6 +495,17 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 result += "\n\nActive Alerts:\n" + "\n".join(
                     f"  {a['msg']}" for a in drive_alerts)
 
+            q_lower = question.lower()
+            smart_tips = ""
+            if "smartctl" in q_lower or "smart" in q_lower or "health" in q_lower:
+                smart_tips = (
+                    f"\n• Run SMART self-test: smartctl -t short /dev/nvme0n1\n"
+                    f"• Full SMART health: smartctl -H /dev/nvmeXn1 → look for PASSED or FAILED\n"
+                    f"• All attributes: smartctl -A /dev/nvmeXn1\n"
+                    f"• Key indicators: Critical Warning (should be 0x00), Media Errors (should be 0)\n"
+                    f"• PASSED = drive healthy. FAILED = replace immediately."
+                )
+
             result += (
                 f"\n\n{divider}\n"
                 f"Tips\n"
@@ -483,6 +513,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 f"• NVMe safe range: 0-70°C normal, >75°C throttle warning\n"
                 f"• Check SMART data: smartctl -A /dev/nvmeXn1\n"
                 f"• RAID status: cat /proc/mdstat"
+                + smart_tips
             )
             return result
 
@@ -546,6 +577,20 @@ def run_probe(probe_type: str, question: str) -> str | None:
                     if alias in q_lower:
                         svc_name = real
                         break
+
+            # Final alias resolution — runs regardless of how svc_name was obtained
+            _canonical = {
+                "omv-pwmfan": "openmediavault-pwmfan",
+                "omvpwmfan": "openmediavault-pwmfan",
+                "pwmfan": "openmediavault-pwmfan",
+                "omv-agent-watch": "omv-agent-watch",
+                "omv-agent-probe": "omv-agent-probe",
+                "omv-agent-discover": "omv-agent-discover",
+                "nfs-kernel-server": "nfs-kernel-server",
+                "openmediavault-engined": "openmediavault-engined",
+            }
+            if svc_name and svc_name.lower() in _canonical:
+                svc_name = _canonical[svc_name.lower()]
 
             if svc_name:
                 status = statuses.get(svc_name)

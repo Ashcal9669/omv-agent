@@ -11,10 +11,12 @@ import json
 import re
 import secrets
 import tempfile
+import threading
 import time
 import uuid
 import argparse
 import logging
+from collections import deque
 from pathlib import Path
 from functools import wraps
 
@@ -33,7 +35,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.0.0"
+VERSION = "1.4.1"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -51,6 +53,66 @@ log = logging.getLogger("omv-agent")
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 brain = Brain()
+
+# ── Session context (in-memory, per browser tab) ──────────────────────────────
+# Each session stores the last N (question, answer) turns so follow-up questions
+# like "why?", "what about nvme1n1?", "explain that" can be routed correctly.
+
+_session_ctx: dict = {}
+_session_ctx_lock = threading.Lock()
+_MAX_CTX_TURNS = 5
+
+# Phrases that strongly signal the user is referencing a previous answer
+_FOLLOWUP_SIGNALS = frozenset({
+    "what about", "how about", "and the", "what does that", "what did you mean",
+    "explain that", "same for", "compared to", "the other", "how about the",
+    "and also", "also the", "what if", "what else", "and what",
+    "tell me more", "more detail", "more info", "continue", "go on",
+    "what does", "does it", "is it", "is that", "are they", "why is",
+    "why does", "what is that", "what are those", "meaning", "so what",
+})
+
+
+def _get_ctx(session_id: str) -> list:
+    """Return recent (question, answer) turns for this session."""
+    with _session_ctx_lock:
+        return list(_session_ctx.get(session_id, []))
+
+
+def _store_ctx(session_id: str, q: str, a: str):
+    """Store a new turn in the in-memory session context."""
+    with _session_ctx_lock:
+        if session_id not in _session_ctx:
+            _session_ctx[session_id] = deque(maxlen=_MAX_CTX_TURNS)
+        _session_ctx[session_id].append((q, a))
+
+
+def _enrich(question: str, ctx: list) -> str:
+    """
+    If the question looks like a follow-up (short or contains reference words),
+    prepend the last 1-2 questions as context so routing and KB search work.
+    The original question text is always preserved at the end.
+    Returns the (possibly enriched) question string.
+    """
+    if not ctx:
+        return question
+    q_lower = question.lower().strip()
+    word_count = len(q_lower.split())
+
+    is_followup = (
+        word_count <= 5
+        or any(sig in q_lower for sig in _FOLLOWUP_SIGNALS)
+        # bare "why" or "how" as standalone questions
+        or q_lower.rstrip("?! ") in ("why", "how", "what", "and", "ok", "really",
+                                      "continue", "more", "else", "explain")
+    )
+
+    if not is_followup:
+        return question
+
+    # Prepend up to the last 2 prior questions as context hints
+    ctx_qs = [t[0] for t in ctx[-2:]]
+    return ". ".join(ctx_qs) + ". " + question
 
 
 # ── Middleware ────────────────────────────────────────────────────────────────
@@ -139,8 +201,12 @@ def query():
     # Sanitize context_page to valid path-like string
     context_page = re.sub(r'[^a-zA-Z0-9/\-_]', '', context_page)
 
-    # Relevance check
-    if not brain.is_relevant(question):
+    # Session context — enrich follow-up questions with prior turn context
+    ctx = _get_ctx(session_id)
+    enriched_q = _enrich(question, ctx)
+
+    # Relevance check on enriched question (allows "why?" after NVMe query to pass)
+    if not brain.is_relevant(enriched_q):
         return jsonify({
             "answer": (
                 "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
@@ -153,7 +219,7 @@ def query():
             "sources": [],
         })
 
-    # Deduplication check
+    # Deduplication check (always on the original question, not enriched)
     q_hash = Brain.hash_question(session_id, question)
     previous = brain.was_already_answered(session_id, q_hash)
     if previous:
@@ -165,13 +231,15 @@ def query():
             "sources": [],
         })
 
-    # Live system probe — intercept queries that need real-time data
-    probe_type = detect_query_type(question)
+    # Live system probe — route using enriched question, run probe with original
+    # (probe handlers extract device names from the question text via regex)
+    probe_type = detect_query_type(enriched_q)
     if probe_type:
         probe_answer = run_probe(probe_type, question)
         if probe_answer:
             is_sys_change, warning_msg = brain.is_system_change(probe_answer)
             brain.record_answer(session_id, q_hash, probe_answer)
+            _store_ctx(session_id, question, probe_answer)
             return jsonify({
                 "answer": probe_answer,
                 "is_system_change": is_sys_change,
@@ -180,8 +248,8 @@ def query():
                 "sources": [{"id": "live-probe", "title": "Live System Data", "topic": "system"}],
             })
 
-    # Search knowledge base
-    results = brain.search(question, context_page=context_page, top_k=3)
+    # Search knowledge base using enriched question for better context matching
+    results = brain.search(enriched_q, context_page=context_page, top_k=3)
 
     if not results:
         answer = (
@@ -208,8 +276,9 @@ def query():
     # System change detection
     is_sys_change, warning_msg = brain.is_system_change(answer)
 
-    # Record in session history
+    # Record in session history (dedup) and in-memory context (follow-up parsing)
     brain.record_answer(session_id, q_hash, answer)
+    _store_ctx(session_id, question, answer)
 
     return jsonify({
         "answer": answer,
