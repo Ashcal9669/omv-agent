@@ -235,6 +235,38 @@ def run_probe(probe_type: str, question: str) -> str | None:
     try:
         # ── Temperatures ────────────────────────────────────────────────────
         if probe_type == "temperature":
+            # Check if user is asking specifically about CPU
+            q_lower = question.lower()
+            if any(w in q_lower for w in ("cpu", "processor", "soc", "pi", "board")):
+                sys_data = cache.get("system", {})
+                cpu_temp = sys_data.get("cpu_temp_c")
+                divider = "─" * 40
+                if cpu_temp is None:
+                    return (
+                        f"CPU Temperature  (live)\n{divider}\n"
+                        f"? — Could not read thermal sensor\n\n"
+                        f"Manual check: cat /sys/class/thermal/thermal_zone0/temp"
+                    )
+                if cpu_temp >= 80:
+                    icon, status = "❌", "CRITICAL — throttling likely"
+                elif cpu_temp >= 70:
+                    icon, status = "⚠️", "Hot — check cooling"
+                elif cpu_temp >= 55:
+                    icon, status = "⚠️", "Warm — monitor"
+                else:
+                    icon, status = "✅", "Normal"
+                return (
+                    f"CPU Temperature  (live)\n{divider}\n"
+                    f"{icon}  {cpu_temp}°C — {status}\n\n"
+                    f"────────────────────────────────────────\n"
+                    f"Tips\n"
+                    f"────────────────────────────────────────\n"
+                    f"• Safe range: below 70°C\n"
+                    f"• Throttle point: 80°C\n"
+                    f"• Pi 5 runs cool with good airflow — idle ~29°C is normal\n"
+                    f"• If temp is high: check fan service (freenove-case-pro.service)"
+                )
+
             drives = cache.get("drives", {})
             match = re.search(
                 r'/dev/(nvme\d+n?\d*|sd[a-z]+|hd[a-z]+|vd[a-z]+)',
@@ -304,7 +336,14 @@ def run_probe(probe_type: str, question: str) -> str | None:
                     f"  Size:    {size}\n"
                     f"  Devices: {active}/{total} active, {failed} failed"
                 )
-            return f"Live RAID Status\n{divider}\n" + f"\n{divider}\n".join(parts)
+            tip = (
+                f"\n{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• Degraded RAID: add replacement disk via OMV Storage -> RAID Management\n"
+                f"• Check detail: mdadm --detail /dev/md0"
+            )
+            return f"Live RAID Status\n{divider}\n" + f"\n{divider}\n".join(parts) + tip
 
         # ── bcache ───────────────────────────────────────────────────────────
         elif probe_type == "bcache":
@@ -338,7 +377,14 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 )
             if not parts:
                 return "bcache — No bcache device info available."
-            return f"bcache Live Status\n{divider}\n" + f"\n{divider}\n".join(parts)
+            tip = (
+                f"\n{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• Toggle writeback: use your bcache-wb script (sudo bcache-wb on/off)\n"
+                f"• Dirty data flushes automatically when writeback is disabled"
+            )
+            return f"bcache Live Status\n{divider}\n" + f"\n{divider}\n".join(parts) + tip
 
         # ── System load / memory ─────────────────────────────────────────────
         elif probe_type == "load":
@@ -429,6 +475,15 @@ def run_probe(probe_type: str, question: str) -> str | None:
             if drive_alerts:
                 result += "\n\nActive Alerts:\n" + "\n".join(
                     f"  {a['msg']}" for a in drive_alerts)
+
+            result += (
+                f"\n\n{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• NVMe safe range: 0-70°C normal, >75°C throttle warning\n"
+                f"• Check SMART data: smartctl -A /dev/nvmeXn1\n"
+                f"• RAID status: cat /proc/mdstat"
+            )
             return result
 
         # ── Network ──────────────────────────────────────────────────────────
@@ -439,7 +494,12 @@ def run_probe(probe_type: str, question: str) -> str | None:
             routes = net.get('routes', 'unavailable')
             return (
                 f"Network Interfaces  (live)\n{divider}\n{ifaces}\n\n"
-                f"Routes\n{divider}\n{routes}"
+                f"Routes\n{divider}\n{routes}\n\n"
+                f"{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• Static IP: OMV -> Network -> Interfaces\n"
+                f"• Check connectivity: ping -c 3 8.8.8.8"
             )
 
         # ── Service status (specific named service) ──────────────────────────
@@ -514,23 +574,35 @@ def run_probe(probe_type: str, question: str) -> str | None:
             pkgs  = upd.get("packages", [])
             divider = "─" * 48
 
+            tip = (
+                f"\n{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• Apply in OMV: System -> Update Management\n"
+                f"• Or via SSH: sudo apt upgrade\n"
+                f"• Refresh package list first: sudo apt update"
+            )
             if count == -1:
                 return (
                     f"System Updates\n{divider}\n"
-                    "Could not check — apt may need a refresh.\n\n"
-                    "Manual: sudo apt update && apt list --upgradable"
+                    f"Could not check — apt may need a refresh.\n\n"
+                    f"Manual: sudo apt update && apt list --upgradable"
+                    + tip
                 )
             elif count == 0:
-                return f"System Updates\n{divider}\n✅ System is up to date — no pending updates."
+                return (
+                    f"System Updates\n{divider}\n"
+                    f"✅ System is up to date — no pending updates."
+                    + tip
+                )
             else:
                 pkg_list = ", ".join(pkgs[:10])
                 more = f" (+{count - 10} more)" if count > 10 else ""
                 return (
                     f"System Updates\n{divider}\n"
                     f"⚠️  {count} update{'s' if count != 1 else ''} available\n\n"
-                    f"Packages: {pkg_list}{more}\n\n"
-                    f"Apply in OMV: System -> Update Management\n"
-                    f"Or via SSH:   sudo apt upgrade"
+                    f"Packages: {pkg_list}{more}"
+                    + tip
                 )
 
         # ── ZFS ──────────────────────────────────────────────────────────────
@@ -550,8 +622,57 @@ def run_probe(probe_type: str, question: str) -> str | None:
         # ── All running services ──────────────────────────────────────────────
         elif probe_type == "services":
             svcs = cache.get("services", {})
+            statuses = svcs.get("statuses", {})
+            raw = svcs.get("running_services", "")
+
+            # Parse raw systemctl output into clean lines
+            # Format: "name.service loaded active running Description"
+            parsed = {}
+            for line in raw.strip().splitlines():
+                parts = line.split()
+                if not parts:
+                    continue
+                name = parts[0]
+                if not name.endswith(".service"):
+                    continue
+                # Extract state from position 2 (active/inactive/failed)
+                state = parts[2] if len(parts) > 2 else "unknown"
+                parsed[name] = state
+
+            # Merge with statuses dict (more reliable)
+            merged = {}
+            for svc, st in statuses.items():
+                merged[svc + ".service" if not svc.endswith(".service") else svc] = st
+            for name, state in parsed.items():
+                if name not in merged:
+                    merged[name] = state
+
+            if not merged:
+                return "No service data available yet."
+
+            lines = []
+            for svc in sorted(merged.keys()):
+                st = merged[svc]
+                if st == "active":
+                    icon = "✅"
+                elif st == "failed":
+                    icon = "❌"
+                else:
+                    icon = "⏸"
+                # Strip .service suffix for cleaner display
+                display = svc.replace(".service", "")
+                lines.append(f"{icon}  {display}")
+
             divider = "─" * 48
-            return f"Running Services\n{divider}\n{svcs.get('running_services','unavailable')}"
+            tip = (
+                f"\n{divider}\n"
+                f"Tips\n"
+                f"{divider}\n"
+                f"• To start a service: systemctl start <name>\n"
+                f"• To check logs: journalctl -u <name> -n 50\n"
+                f"• To enable on boot: systemctl enable <name>"
+            )
+            return f"Active Services\n{divider}\n" + "\n".join(lines) + tip
 
         # ── Anomalies ─────────────────────────────────────────────────────────
         elif probe_type == "anomalies":

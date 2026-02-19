@@ -81,12 +81,22 @@ def probe_system() -> dict:
 
     mem = _run(["free", "-h"])
     uptime = _run(["uptime", "-p"]).strip()
+
+    # CPU temperature (Raspberry Pi / ARM SoC)
+    cpu_temp_c = None
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp") as f:
+            cpu_temp_c = round(int(f.read().strip()) / 1000, 1)
+    except Exception:
+        pass
+
     return {
         "load_1m":  load_1m_str,
         "load_5m":  load_5m_str,
         "load_15m": load_15m_str,
         "memory": mem.strip(),
         "uptime": uptime,
+        "cpu_temp_c": cpu_temp_c,
     }
 
 
