@@ -35,7 +35,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -62,14 +62,15 @@ _session_ctx: dict = {}
 _session_ctx_lock = threading.Lock()
 _MAX_CTX_TURNS = 5
 
-# Phrases that strongly signal the user is referencing a previous answer
+# Phrases that are TRUE anaphoric follow-ups (reference a specific prior answer)
+# Keep this list narrow — broad phrases incorrectly enrich standalone questions
 _FOLLOWUP_SIGNALS = frozenset({
-    "what about", "how about", "and the", "what does that", "what did you mean",
-    "explain that", "same for", "compared to", "the other", "how about the",
-    "and also", "also the", "what if", "what else", "and what",
-    "tell me more", "more detail", "more info", "continue", "go on",
-    "what does", "does it", "is it", "is that", "are they", "why is",
-    "why does", "what is that", "what are those", "meaning", "so what",
+    "what about", "how about", "what does that", "what did you mean",
+    "explain that", "same for", "compared to", "the other one",
+    "tell me more", "more detail", "more info about that",
+    "what is that", "what are those", "what does it mean",
+    "does it affect", "is it related", "are they the same",
+    "which one is", "what was that", "and that one",
 })
 
 
@@ -89,22 +90,28 @@ def _store_ctx(session_id: str, q: str, a: str):
 
 def _enrich(question: str, ctx: list) -> str:
     """
-    If the question looks like a follow-up (short or contains reference words),
-    prepend the last 1-2 questions as context so routing and KB search work.
-    The original question text is always preserved at the end.
-    Returns the (possibly enriched) question string.
+    Enrich a question with prior session context ONLY when it is a true follow-up:
+    - A bare one-or-two-word question (after stripping punctuation) like "why?" or "how so?"
+    - OR contains an explicit anaphoric phrase from _FOLLOWUP_SIGNALS
+
+    Standalone questions — even short ones like "system loads?" or "any anomalies?" —
+    are NOT enriched, so they route correctly on their own keywords.
     """
     if not ctx:
         return question
     q_lower = question.lower().strip()
-    word_count = len(q_lower.split())
+    q_stripped = q_lower.rstrip("?!. ").strip()
+    word_count = len(q_stripped.split())
 
     is_followup = (
-        word_count <= 5
+        # True bare follow-ups: single word or two-word anaphors
+        word_count <= 2 and q_stripped in (
+            "why", "how", "what", "and", "ok", "really", "continue", "more",
+            "else", "explain", "why not", "how so", "what then", "and then",
+            "so what", "like what", "for example", "such as",
+        )
+        # Explicit anaphoric signal phrases
         or any(sig in q_lower for sig in _FOLLOWUP_SIGNALS)
-        # bare "why" or "how" as standalone questions
-        or q_lower.rstrip("?! ") in ("why", "how", "what", "and", "ok", "really",
-                                      "continue", "more", "else", "explain")
     )
 
     if not is_followup:

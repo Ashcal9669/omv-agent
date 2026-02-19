@@ -52,6 +52,10 @@ RELEVANT_KEYWORDS = {
     "slow", "error", "fail", "failed", "broken", "corrupt", "repair",
     "interface", "ethernet", "wifi", "wireless", "speed", "duplex",
     "ping", "route", "subnet", "vlan", "bridge", "bond",
+    # Anomaly / health queries
+    "anomaly", "anomalies", "abnormal", "abnormality", "abnormalities",
+    "alert", "alerts", "detect", "detected", "since boot", "boot",
+    "hiccup", "problem", "issue", "issues",
     # Agent self-awareness / capability queries
     "agent", "capability", "capabilities", "feature", "features",
     "what can", "what do you", "help me", "yourself", "about you",

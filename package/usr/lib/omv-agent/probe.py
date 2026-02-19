@@ -32,6 +32,7 @@ def detect_query_type(question: str) -> str | None:
     Returns a probe type string or None if the static KB should answer.
 
     Probe types:
+      capabilities  — agent self-description (what can you do)
       temperature   — drive temperatures (specific device or all)
       raid          — RAID / md array status
       bcache        — bcache dirty data, writeback on/off, state
@@ -48,6 +49,19 @@ def detect_query_type(question: str) -> str | None:
       anomalies     — detected system anomalies / alerts
     """
     q = question.lower()
+
+    # ── Agent capabilities / self-description (must come FIRST) ─────────────
+    if any(p in q for p in ["what can you", "what can u", "what do you do",
+                              "your capabilities", "your features", "what are you",
+                              "tell me what you", "what you can do", "about yourself",
+                              "what help", "what can i ask", "what you do",
+                              "what can the agent", "agent capabilities",
+                              "what does the agent"]):
+        return "capabilities"
+    if q.strip().rstrip("?!. ") in ("capabilities", "features", "what can you do",
+                                     "what are your features", "what do you know",
+                                     "what do you do", "what are you"):
+        return "capabilities"
 
     # ── CPU / SoC temperature (must come BEFORE generic temperature block) ───
     if any(w in q for w in ("cpu", "processor", "soc", "board temp")):
@@ -232,6 +246,41 @@ def _fmt_section(title, content):
 
 def run_probe(probe_type: str, question: str) -> str | None:
     """Read from probe cache and return a formatted answer."""
+
+    # Capabilities response is static — no cache needed
+    if probe_type == "capabilities":
+        divider = "─" * 48
+        return (
+            f"OMV Agent v1.4.1 — What I Can Help With\n{divider}\n"
+            f"Live System Data (real-time from probe daemon):\n"
+            f"  • Drive temperatures — NVMe, SATA, HDD\n"
+            f"  • CPU / SoC temperature\n"
+            f"  • System load, RAM usage, uptime\n"
+            f"  • RAID / MD array status and health\n"
+            f"  • Disk space usage per filesystem\n"
+            f"  • Named service status (nginx, smb, docker, pwmfan...)\n"
+            f"  • Drive health overview (SMART temperature summary)\n"
+            f"  • Pending system updates\n"
+            f"  • Network interfaces and routes\n"
+            f"  • Anomalies detected since boot\n"
+            f"  • bcache dirty data and writeback mode\n"
+            f"\n{divider}\n"
+            f"Knowledge Base (77 entries):\n"
+            f"  • OMV 8 configuration, plugins, workbench\n"
+            f"  • Filesystems: ext4, btrfs, XFS, ZFS, NFS, SMB\n"
+            f"  • RAID setup, rebuilding, and management\n"
+            f"  • Docker and Portainer on OMV\n"
+            f"  • Disk management, partitioning, SMART\n"
+            f"  • bcache read/write caching\n"
+            f"  • Users, permissions, and ACLs\n"
+            f"  • Network shares, Samba, NFS exports\n"
+            f"\n{divider}\n"
+            f"Limitations:\n"
+            f"  • Cannot execute commands — guidance only\n"
+            f"  • Only answers OMV, NAS, and Linux questions\n"
+            f"  • System change suggestions require your confirmation"
+        )
+
     cache = _load_cache()
 
     if cache is None:
