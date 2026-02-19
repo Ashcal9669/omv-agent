@@ -120,6 +120,7 @@ def probe_services() -> dict:
         "openmediavault-engined", "salt-minion", "collectd",
         "avahi-daemon", "pihole-FTL", "jellyfin", "monit",
         "darkstat", "chrony", "bluetooth", "cron",
+        "freenove-case-pro", "openmediavault-pwmfan",
     ]
     statuses = {}
     for svc in key_services:
