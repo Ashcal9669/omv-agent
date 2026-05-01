@@ -34,7 +34,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.2.0_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.5.1_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -56,4 +56,4 @@ bash build.sh
 
 ## Version
 
-`1.2.0` — Watcher daemon + dynamic discovery + bcache/updates/service probes + 5s anomaly scanning
+`1.5.1` - Detailed live probes, safer text rendering, watcher/discovery services, event queue, and updated OMV 8 knowledge base

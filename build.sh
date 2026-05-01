@@ -8,6 +8,93 @@ VER_DIR="$SCRIPT_DIR/versions"
 VERSION="1.5.1"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
+sync_control_version() {
+    tmp="$(mktemp)"
+    sed "s/^Version:.*/Version: $VERSION/" "$PKG_DIR/DEBIAN/control" > "$tmp"
+    mv "$tmp" "$PKG_DIR/DEBIAN/control"
+}
+
+write_repo_metadata() {
+    local pkg_path="$OUT_DIR/$PKG_NAME"
+    local rel_path="dist/$PKG_NAME"
+    local size md5 sha1 sha256 packages_md5 packages_sha256 packages_gz_md5 packages_gz_sha256
+    local packages_size packages_gz_size release_date
+
+    if [ ! -f "$pkg_path" ]; then
+        echo "ERROR: Package not found for repo metadata: $pkg_path" >&2
+        exit 1
+    fi
+
+    size="$(wc -c < "$pkg_path" | tr -d ' ')"
+    md5="$(md5sum "$pkg_path" | awk '{print $1}')"
+    sha1="$(shasum -a 1 "$pkg_path" | awk '{print $1}')"
+    sha256="$(shasum -a 256 "$pkg_path" | awk '{print $1}')"
+
+    {
+        sed '/^Filename:/d;/^Size:/d;/^MD5sum:/d;/^SHA1:/d;/^SHA256:/d' "$PKG_DIR/DEBIAN/control"
+        echo "Filename: $rel_path"
+        echo "Size: $size"
+        echo "MD5sum: $md5"
+        echo "SHA1: $sha1"
+        echo "SHA256: $sha256"
+    } > "$SCRIPT_DIR/Packages"
+
+    gzip -c "$SCRIPT_DIR/Packages" > "$SCRIPT_DIR/Packages.gz"
+
+    packages_size="$(wc -c < "$SCRIPT_DIR/Packages" | tr -d ' ')"
+    packages_gz_size="$(wc -c < "$SCRIPT_DIR/Packages.gz" | tr -d ' ')"
+    packages_md5="$(md5sum "$SCRIPT_DIR/Packages" | awk '{print $1}')"
+    packages_gz_md5="$(md5sum "$SCRIPT_DIR/Packages.gz" | awk '{print $1}')"
+    packages_sha256="$(shasum -a 256 "$SCRIPT_DIR/Packages" | awk '{print $1}')"
+    packages_gz_sha256="$(shasum -a 256 "$SCRIPT_DIR/Packages.gz" | awk '{print $1}')"
+    release_date="$(date -u '+%a, %d %b %Y %H:%M:%S +0000')"
+
+    cat > "$SCRIPT_DIR/Release" << EOF
+Archive: stable
+Component: main
+Origin: omv-agent
+Label: OMV Agent Helper
+Architectures: all arm64 amd64
+Date: $release_date
+MD5Sum:
+ $packages_md5 $packages_size Packages
+ $packages_gz_md5 $packages_gz_size Packages.gz
+SHA256:
+ $packages_sha256 $packages_size Packages
+ $packages_gz_sha256 $packages_gz_size Packages.gz
+EOF
+}
+
+build_deb_package() {
+    if command -v dpkg-deb >/dev/null 2>&1; then
+        dpkg-deb --build --root-owner-group "$PKG_DIR" "$OUT_DIR/$PKG_NAME"
+        return
+    fi
+
+    if ! command -v ar >/dev/null 2>&1; then
+        echo "ERROR: Neither dpkg-deb nor ar is available to build the package." >&2
+        exit 1
+    fi
+
+    tmpdir="$(mktemp -d)"
+    trap 'rm -rf "$tmpdir"' EXIT
+
+    printf '2.0\n' > "$tmpdir/debian-binary"
+    tar -C "$PKG_DIR/DEBIAN" \
+        --uid 0 --gid 0 --uname root --gname root \
+        -czf "$tmpdir/control.tar.gz" .
+    tar -C "$PKG_DIR" \
+        --exclude ./DEBIAN \
+        --uid 0 --gid 0 --uname root --gname root \
+        -czf "$tmpdir/data.tar.gz" .
+
+    rm -f "$OUT_DIR/$PKG_NAME"
+    ar -qS "$OUT_DIR/$PKG_NAME" \
+        "$tmpdir/debian-binary" \
+        "$tmpdir/control.tar.gz" \
+        "$tmpdir/data.tar.gz"
+}
+
 echo "=== OMV Agent Helper — Build Script ==="
 echo ""
 
@@ -15,7 +102,7 @@ echo ""
 mkdir -p "$OUT_DIR" "$VER_DIR"
 
 # Backup any existing .deb before overwriting
-echo "[0/5] Backing up previous build..."
+echo "[0/7] Backing up previous build..."
 for old in "$OUT_DIR"/openmediavault-agent_*.deb; do
     [ -f "$old" ] || continue
     base="$(basename "$old" .deb)"
@@ -25,13 +112,13 @@ for old in "$OUT_DIR"/openmediavault-agent_*.deb; do
 done
 
 # Copy widget.js to static serving dir
-echo "[1/6] Preparing static files..."
+echo "[1/7] Preparing static files..."
 mkdir -p "$PKG_DIR/usr/lib/omv-agent/static"
 cp -f "$PKG_DIR/usr/lib/omv-agent/widget.js" \
       "$PKG_DIR/usr/lib/omv-agent/static/widget.js"
 
 # Copy knowledge base to package
-echo "[2/6] Copying knowledge base..."
+echo "[2/7] Copying knowledge base..."
 if [ -f "$SCRIPT_DIR/knowledge/knowledge_base.json" ]; then
     mkdir -p "$PKG_DIR/usr/share/omv-agent/knowledge"
     cp -f "$SCRIPT_DIR/knowledge/knowledge_base.json" \
@@ -50,7 +137,7 @@ EOF
 fi
 
 # Set permissions
-echo "[3/6] Setting permissions..."
+echo "[3/7] Setting permissions..."
 # DEBIAN scripts must be executable
 chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/prerm" \
@@ -66,7 +153,7 @@ chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/postrm"
 
 # Validate control file
-echo "[4/6] Validating package structure..."
+echo "[4/7] Validating package structure..."
 if [ ! -f "$PKG_DIR/DEBIAN/control" ]; then
     echo "ERROR: DEBIAN/control not found!" >&2
     exit 1
@@ -100,11 +187,14 @@ done
 echo "    All required files present."
 
 # Build the .deb
-echo "[5/6] Syncing version to DEBIAN/control..."
-sed -i "s/^Version:.*/Version: $VERSION/" "$PKG_DIR/DEBIAN/control"
+echo "[5/7] Syncing version to DEBIAN/control..."
+sync_control_version
 
-echo "[6/6] Building .deb package..."
-dpkg-deb --build --root-owner-group "$PKG_DIR" "$OUT_DIR/$PKG_NAME"
+echo "[6/7] Building .deb package..."
+build_deb_package
+
+echo "[7/7] Refreshing repository metadata..."
+write_repo_metadata
 
 echo ""
 echo "=== BUILD SUCCESSFUL ==="

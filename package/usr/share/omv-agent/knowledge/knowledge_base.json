@@ -1,5 +1,5 @@
 {
-  "version": "1.4",
+  "version": "1.5.1",
   "omv_version": "8",
   "generated": "2026-02-18",
   "source": "Scanned from live OMV 8 installation: /usr/share/openmediavault/workbench/ and /usr/share/openmediavault/engined/rpc/",
@@ -1893,13 +1893,13 @@
     {
       "id": "agent-version-history",
       "topic": "OMV Agent",
-      "title": "OMV Agent: Version History and What Changed in v1.4.0",
-      "content": "Version history and key improvements per release:\n\nv1.0.0 \u2014 Initial release\nBasic knowledge base assistant with 55 general OMV entries. Static answers only.\n\nv1.1.0 \u2014 Live system probes\nAdded omv-agent-probe.service daemon. Live NVMe temps, RAID status, bcache writeback, service health, disk usage, system load. Added omv-agent-watch.service for journal tailing and udev monitoring.\n\nv1.2.0 \u2014 Watcher daemon + event queue\nFull watcher daemon with service state diffing, device monitoring, anomaly detection. FAB badge alerts. POST /events endpoint.\n\nv1.3.0 \u2014 votdev alignment: RRD integration + plugin API + discovery daemon\nLoad averages now read from collectd's existing RRD data (no metric duplication). POST /omv-agent/events open API so any plugin can push alerts. New omv-agent-discover.service daemon watching for new packages, services, configs.\n\nv1.4.0 \u2014 Detailed answers, clean formatting, two PWM services, CPU temp live probe\nAll responses restructured: direct answer + Tips section with actionable recommendations. CPU temperature now a live probe from thermal_zone0 (not a static KB answer). Services response parsed into clean bullet lines with \u2705 \u274c \u23f8 status icons. df output filtered \u2014 Docker overlays, tmpfs, udev removed. Both openmediavault-pwmfan and freenove-case-pro independently queryable. 34 markdown instances removed \u2014 all responses safe for textContent rendering. Alias map extended: pwmfan, omv-pwmfan, openmediavault-pwmfan all resolve correctly.",
+      "title": "OMV Agent: Version History and What Changed in v1.5.1",
+      "content": "Version history and key improvements per release:\n\nv1.0.0 \u2014 Initial release\nBasic knowledge base assistant with 55 general OMV entries. Static answers only.\n\nv1.1.0 \u2014 Live system probes\nAdded omv-agent-probe.service daemon. Live NVMe temps, RAID status, bcache writeback, service health, disk usage, system load. Added omv-agent-watch.service for journal tailing and udev monitoring.\n\nv1.2.0 \u2014 Watcher daemon + event queue\nFull watcher daemon with service state diffing, device monitoring, anomaly detection. FAB badge alerts. POST /events endpoint.\n\nv1.3.0 \u2014 votdev alignment: RRD integration + plugin API + discovery daemon\nLoad averages now read from collectd's existing RRD data (no metric duplication). POST /omv-agent/events open API so any plugin can push alerts. New omv-agent-discover.service daemon watching for new packages, services, configs.\n\nv1.4.0 \u2014 Detailed answers, clean formatting, two PWM services, CPU temp live probe\nAll responses restructured: direct answer + Tips section with actionable recommendations. CPU temperature now a live probe from thermal_zone0 (not a static KB answer). Services response parsed into clean bullet lines with \u2705 \u274c \u23f8 status icons. df output filtered \u2014 Docker overlays, tmpfs, udev removed. Both openmediavault-pwmfan and freenove-case-pro independently queryable. 34 markdown instances removed \u2014 all responses safe for textContent rendering. Alias map extended: pwmfan, omv-pwmfan, openmediavault-pwmfan all resolve correctly.\n\nv1.5.1 \u2014 Version alignment and packaging refresh\nPackage metadata, backend health endpoint, capabilities response, Workbench display strings, repository index metadata, and bundled knowledge metadata are aligned on 1.5.1.",
       "tags": [
         "version",
         "changelog",
         "history",
-        "v1.4.0",
+        "v1.5.1",
         "updates",
         "what changed",
         "improvements"

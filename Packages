@@ -1,18 +1,10 @@
 Package: openmediavault-agent
-Version: 1.4.2
+Version: 1.5.1
 Architecture: all
 Maintainer: OMV Agent Project <omv-agent@localhost>
 Installed-Size: 256
 Depends: openmediavault (>= 8), python3 (>= 3.9), python3-flask, nginx
 Suggests: python3-pip
-Filename: dist/openmediavault-agent_1.4.2_all.deb
-Size: 108632
-MD5sum: e27b970f2c2f384c3d0aec4233e0953e
-SHA1: 7e76a687790db57c348d1984c4d6d3227436f4d7
-SHA256: 814e8ec4d93e6f71ff6d2fa729fc220993ac68ef9c43ce26e71d333da71c1357
-Section: admin
-Priority: optional
-Homepage: https://github.com/Ashcal9669/omv-agent
 Description: OMV Intelligent Agent Helper
  An animated, context-aware assistant for OpenMediaVault 8.
  .
@@ -33,4 +25,11 @@ Description: OMV Intelligent Agent Helper
   - Fully offline — no external API calls
  .
  Supports ARM64 and AMD64 (Architecture: all).
-
+Section: admin
+Priority: optional
+Homepage: https://github.com/Ashcal9669/omv-agent
+Filename: dist/openmediavault-agent_1.5.1_all.deb
+Size: 104102
+MD5sum: 49615402209e91feca5a7c2f22a0ce35
+SHA1: 349784a3daca4f761892923e8da9a61afd6117a4
+SHA256: c3a1e87c6b9a56941c8b5577db213c89dd44c4aff06cf084176b3f555728f25d
