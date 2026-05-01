@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
 VER_DIR="$SCRIPT_DIR/versions"
-VERSION="1.5.1"
+VERSION="1.5.2"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 sync_control_version() {
@@ -80,12 +80,21 @@ build_deb_package() {
     trap 'rm -rf "$tmpdir"' EXIT
 
     printf '2.0\n' > "$tmpdir/debian-binary"
+    
+    # Use COPYFILE_DISABLE=1 and --no-xattrs to avoid PAX headers on macOS
+    export COPYFILE_DISABLE=1
+    
     tar -C "$PKG_DIR/DEBIAN" \
         --uid 0 --gid 0 --uname root --gname root \
+        --format=ustar \
+        --no-xattrs \
         -czf "$tmpdir/control.tar.gz" .
     tar -C "$PKG_DIR" \
         --exclude ./DEBIAN \
+        --exclude '.DS_Store' \
         --uid 0 --gid 0 --uname root --gname root \
+        --format=ustar \
+        --no-xattrs \
         -czf "$tmpdir/data.tar.gz" .
 
     rm -f "$OUT_DIR/$PKG_NAME"
