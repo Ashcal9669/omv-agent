@@ -35,7 +35,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.4.2"
+VERSION = "1.5.1"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -179,6 +179,20 @@ def health():
     })
 
 
+@app.route("/boot-status", methods=["GET"])
+def boot_status():
+    report_file = "/run/omv-agent/boot_report.json"
+    if not os.path.exists(report_file):
+        return jsonify({"status": "pending"}), 200
+
+    try:
+        with open(report_file, "r") as f:
+            return jsonify(json.load(f)), 200
+    except Exception:
+        log.error("boot_status: failed to read boot report", exc_info=True)
+        return jsonify({"status": "pending"}), 200
+
+
 @app.route("/query", methods=["POST"])
 @require_json
 def query():
@@ -316,6 +330,10 @@ def feedback():
         return error_response("Invalid question_hash")
 
     brain.record_feedback(session_id, q_hash, helpful)
+    try:
+        brain.process_learning()
+    except Exception:
+        log.warning("feedback: learning bridge pass failed", exc_info=True)
     return jsonify({"status": "ok"})
 
 
@@ -528,6 +546,7 @@ def init_db():
         log.info("Loaded %d knowledge entries", count)
     else:
         log.warning("Knowledge base not found at %s — running with empty brain", kb_path)
+    brain.start_learning_bridge()
 
 
 if __name__ == "__main__":

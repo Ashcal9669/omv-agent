@@ -10,9 +10,12 @@ import os
 import re
 import time
 import math
+import threading
 from pathlib import Path
 
 DB_PATH = os.environ.get("OMV_AGENT_DB", "/var/lib/omv-agent/brain.db")
+EVENT_QUEUE_PATH = os.environ.get("OMV_AGENT_EVENT_QUEUE", "/run/omv-agent/event_queue.json")
+LEARNING_POLL_INTERVAL = int(os.environ.get("OMV_AGENT_LEARNING_INTERVAL", "60"))
 
 # Keywords that confirm a question is OMV/NAS/Linux-related
 RELEVANT_KEYWORDS = {
@@ -137,6 +140,224 @@ class Brain:
                 CREATE INDEX IF NOT EXISTS idx_session_ts ON session_history(session_id, timestamp);
                 CREATE INDEX IF NOT EXISTS idx_knowledge_topic ON knowledge(topic);
             """)
+
+    @staticmethod
+    def _knowledge_id(prefix: str, *parts: str) -> str:
+        raw = "\x1f".join(str(p or "") for p in parts)
+        return f"{prefix}-{hashlib.sha256(raw.encode()).hexdigest()[:16]}"
+
+    def _write_knowledge_entry(
+        self,
+        conn,
+        entry_id: str,
+        topic: str,
+        title: str,
+        content: str,
+        tags: list,
+        context_pages: list | None = None,
+        related_ids: list | None = None,
+    ) -> bool:
+        """
+        Insert or update a learned knowledge entry.
+
+        Returns True only when the row was new or changed, so callers can decide
+        whether the full-text index needs to be rebuilt.
+        """
+        content = str(content or "").strip()[:4000]
+        if not content:
+            return False
+
+        payload = (
+            topic,
+            title[:160],
+            content,
+            json.dumps(tags or []),
+            json.dumps(context_pages or []),
+            json.dumps(related_ids or []),
+        )
+        existing = conn.execute("""
+            SELECT topic, title, content, tags, context_pages, related_ids
+            FROM knowledge
+            WHERE id = ?
+        """, (entry_id,)).fetchone()
+        if existing and tuple(existing) == payload:
+            return False
+
+        conn.execute("""
+            INSERT OR REPLACE INTO knowledge
+                (id, topic, title, content, tags, context_pages, related_ids)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (entry_id, *payload))
+        return True
+
+    def _read_event_queue(self, event_queue_path: str = EVENT_QUEUE_PATH) -> list:
+        """
+        Read the local watcher/discoverer event queue.
+
+        watcher.py writes {"events": [...]} while discoverer.py can write a raw
+        list, so both shapes are accepted. This is intentionally file-only and
+        offline; no network transports are used by the learning bridge.
+        """
+        try:
+            with open(event_queue_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            return []
+
+        if isinstance(data, dict):
+            events = data.get("events", [])
+        elif isinstance(data, list):
+            events = data
+        else:
+            events = []
+        return [e for e in events if isinstance(e, dict)]
+
+    def learn_from_feedback(self, limit: int = 100) -> int:
+        """
+        Promote helpful feedback-backed answers into the knowledge table.
+
+        The feedback table stores only session_id/question_hash/helpful, so the
+        matching session_history row supplies the answer text. Unhelpful feedback
+        is read and intentionally not promoted into searchable knowledge.
+        """
+        changed = 0
+        with self._get_conn() as conn:
+            rows = conn.execute("""
+                SELECT f.session_id, f.question_hash, f.helpful, f.timestamp, s.answer
+                FROM feedback f
+                LEFT JOIN session_history s
+                  ON s.session_id = f.session_id
+                 AND s.question_hash = f.question_hash
+                ORDER BY f.timestamp DESC
+                LIMIT ?
+            """, (limit,)).fetchall()
+
+            for row in rows:
+                if int(row["helpful"]) != 1 or not row["answer"]:
+                    continue
+                entry_id = self._knowledge_id(
+                    "learned-feedback",
+                    row["session_id"],
+                    row["question_hash"],
+                )
+                title = f"Helpful answer learned from feedback {row['question_hash']}"
+                content = (
+                    "A user marked this OMV Agent answer as helpful.\n\n"
+                    f"{row['answer']}"
+                )
+                if self._write_knowledge_entry(
+                    conn,
+                    entry_id,
+                    "learned-feedback",
+                    title,
+                    content,
+                    ["learned", "feedback", "helpful"],
+                ):
+                    changed += 1
+
+            if changed:
+                conn.execute("INSERT INTO knowledge_fts(knowledge_fts) VALUES('rebuild')")
+        return changed
+
+    def learn_from_events(
+        self,
+        event_queue_path: str = EVENT_QUEUE_PATH,
+        limit: int = 100,
+    ) -> int:
+        """Convert watcher/discoverer events into local system-observation knowledge."""
+        events = self._read_event_queue(event_queue_path)[-limit:]
+        if not events:
+            return 0
+
+        changed = 0
+        with self._get_conn() as conn:
+            for event in events:
+                event_type = str(event.get("type", "event"))[:64]
+                source = str(event.get("source", "unknown"))[:128]
+                level = str(event.get("level", "info"))[:16]
+                msg = str(event.get("msg", "")).strip()[:500]
+                timestamp = int(event.get("timestamp", 0) or 0)
+                event_id = str(event.get("id", "")).strip()
+                if not msg:
+                    continue
+
+                entry_id = self._knowledge_id(
+                    "learned-event",
+                    event_id or event_type,
+                    source,
+                    msg,
+                    str(timestamp),
+                )
+                title = f"Observed {event_type.replace('_', ' ')} from {source}"
+                content = (
+                    "Local OMV Agent watcher/discoverer event learned offline.\n\n"
+                    f"Level: {level}\n"
+                    f"Type: {event_type}\n"
+                    f"Source: {source}\n"
+                    f"Timestamp: {timestamp}\n"
+                    f"Message: {msg}"
+                )
+                if self._write_knowledge_entry(
+                    conn,
+                    entry_id,
+                    "system-events",
+                    title,
+                    content,
+                    ["learned", "event", level, event_type],
+                ):
+                    changed += 1
+
+            if changed:
+                conn.execute("INSERT INTO knowledge_fts(knowledge_fts) VALUES('rebuild')")
+        return changed
+
+    def process_learning(self, event_queue_path: str = EVENT_QUEUE_PATH) -> dict:
+        """Run one offline learning pass from feedback and the event queue."""
+        feedback_entries = self.learn_from_feedback()
+        event_entries = self.learn_from_events(event_queue_path=event_queue_path)
+        return {
+            "feedback_entries": feedback_entries,
+            "event_entries": event_entries,
+            "total_entries": feedback_entries + event_entries,
+        }
+
+    def start_learning_bridge(
+        self,
+        event_queue_path: str = EVENT_QUEUE_PATH,
+        interval: int = LEARNING_POLL_INTERVAL,
+    ):
+        """
+        Start a lightweight background learner.
+
+        The thread is daemonized so it cannot block service shutdown. It polls
+        only local SQLite/file data and writes learned entries to knowledge.
+        """
+        if getattr(self, "_learning_thread", None):
+            if self._learning_thread.is_alive():
+                return
+
+        self._learning_stop = threading.Event()
+
+        def _loop():
+            while not self._learning_stop.is_set():
+                try:
+                    self.process_learning(event_queue_path=event_queue_path)
+                except Exception:
+                    # Learning is opportunistic; query serving must continue.
+                    pass
+                self._learning_stop.wait(max(5, int(interval)))
+
+        self._learning_thread = threading.Thread(
+            target=_loop,
+            name="omv-agent-learning-bridge",
+            daemon=True,
+        )
+        self._learning_thread.start()
+
+    def stop_learning_bridge(self):
+        stop = getattr(self, "_learning_stop", None)
+        if stop:
+            stop.set()
 
     def load_knowledge(self, json_path: str) -> int:
         """Load knowledge_base.json into SQLite. Returns count of entries loaded."""

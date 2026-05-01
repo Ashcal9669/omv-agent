@@ -30,13 +30,13 @@
           {
             "type": "paragraph",
             "text": "The Agent Helper provides context-aware assistance for NAS management, Linux filesystem operations, and OpenMediaVault configuration. It runs entirely offline — no data leaves your NAS. All system change suggestions require your explicit confirmation before being shown."
+          },
+          {
+            "type": "paragraph",
+            "text": "Version: 1.5.0"
           }
         ],
-        "buttons": [],
-        "request": {
-          "service": "OmvAgent",
-          "get": { "method": "getSettings" }
-        }
+        "buttons": []
       }
     }
   }
