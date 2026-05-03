@@ -35,7 +35,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.6.0_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.6.1_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -60,4 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.6.0` - Optional loopback-only Ollama fallback for human phrasing, deterministic live probes, and aligned package metadata
+`1.6.1` - Improves optional Ollama routing for broad human phrasing before knowledge-base search, with deterministic live probes preserved

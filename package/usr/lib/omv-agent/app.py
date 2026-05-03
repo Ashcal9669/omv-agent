@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.6.0"
+VERSION = "1.6.1"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -240,19 +240,20 @@ def query():
         })
 
     probe_question = question
+    ollama_interpretation = None
 
     # Relevance check on enriched question (allows "why?" after NVMe query to pass).
     # If the keyword gate misses a human phrasing, ask local Ollama to rewrite it
     # into a routeable OMV/NAS/Linux query before refusing.
     if not brain.is_relevant(enriched_q):
-        ollama = interpret_question(question, context_page=context_page)
-        if ollama and ollama.get("in_scope"):
-            rewritten_q = str(ollama.get("rewritten_question", "")).strip()
+        ollama_interpretation = interpret_question(question, context_page=context_page)
+        if ollama_interpretation and ollama_interpretation.get("in_scope"):
+            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
             enriched_q = _enrich(rewritten_q or question, ctx)
             probe_question = rewritten_q or question
 
             if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
-                answer = str(ollama.get("answer", "")).strip() or (
+                answer = str(ollama_interpretation.get("answer", "")).strip() or (
                     "I understand this as an OMV/NAS question, but I don't have "
                     "enough local data to answer it precisely."
                 )
@@ -268,7 +269,7 @@ def query():
                 })
         else:
             answer = (
-                str((ollama or {}).get("answer", "")).strip()
+                str((ollama_interpretation or {}).get("answer", "")).strip()
                 or "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
                    "I can't help with that topic, but I'm happy to answer questions about "
                    "your NAS, filesystems, network shares, disk management, or OMV settings."
@@ -278,12 +279,27 @@ def query():
                 "is_system_change": False,
                 "warning_message": "",
                 "already_answered": False,
-                "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}] if ollama else [],
+                "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}] if ollama_interpretation else [],
             })
 
     # Live system probe — route using enriched/rephrased question when needed.
     # Probe handlers extract device names from the question text via regex.
     probe_type = detect_query_type(enriched_q)
+    if not probe_type:
+        # If Ollama is explicitly enabled, let it clarify broad human phrasing
+        # before the FTS knowledge search can latch onto an unrelated keyword.
+        if ollama_interpretation is None:
+            ollama_interpretation = interpret_question(question, context_page=context_page)
+        if ollama_interpretation and ollama_interpretation.get("in_scope"):
+            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
+            if rewritten_q and rewritten_q.lower() != enriched_q.lower():
+                rewritten_enriched = _enrich(rewritten_q, ctx)
+                rewritten_probe = detect_query_type(rewritten_enriched)
+                if rewritten_probe:
+                    enriched_q = rewritten_enriched
+                    probe_question = rewritten_q
+                    probe_type = rewritten_probe
+
     if probe_type:
         probe_answer = run_probe(probe_type, probe_question)
         if probe_answer:
