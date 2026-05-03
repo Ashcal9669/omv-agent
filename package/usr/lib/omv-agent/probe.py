@@ -160,12 +160,15 @@ def detect_query_type(question: str) -> str | None:
         "docker", "omv-agent", "salt", "collectd", "avahi", "pihole",
         "jellyfin", "monit", "pwm", "fan", "freenove", "darkstat",
         "openmediavault", "engined", "chrony", "cron", "bluetooth",
-        "containerd", "uptime-kuma",
+        "containerd", "uptime-kuma", "suricata", "evebox",
     ]
     if any(svc in q for svc in _svc_names):
         if any(w in q for w in ["status", "running", "active", "state", "is",
-                                  "started", "enabled", "check", "stopped"]):
+                                  "started", "enabled", "check", "stopped",
+                                  "asked", "about", "logging", "log"]):
             return "service_status"
+    if any(svc in q for svc in ["suricata", "evebox"]):
+        return "service_status"
     # "is X running / active" pattern
     if re.search(r'\b(is|are)\b.+\b(running|active|started|enabled|stopped)\b', q):
         return "service_status"
@@ -254,7 +257,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
     if probe_type == "capabilities":
         divider = "─" * 48
         return (
-            f"OMV Agent v1.6.3 — What I Can Help With\n{divider}\n"
+            f"OMV Agent v1.6.4 — What I Can Help With\n{divider}\n"
             f"Live System Data (real-time from probe daemon):\n"
             f"  • Drive temperatures — NVMe, SATA, HDD\n"
             f"  • CPU / SoC temperature\n"
@@ -590,47 +593,33 @@ def run_probe(probe_type: str, question: str) -> str | None:
             svc_data    = cache.get("services", {})
             statuses    = svc_data.get("statuses", {})
             running_list = svc_data.get("running_services", "")
-
-            # 1. Try to extract exact .service name
-            m = re.search(r'([\w][\w\-\.]*[\w])\.service', question, re.IGNORECASE)
-            if m:
-                raw = m.group(1)
-                # strip redundant .service-within-name artefacts
-                svc_name = raw.rstrip(".")
-            else:
-                # 2. Map common aliases to real service names
-                _alias = {
-                    "smb": "smbd", "samba": "smbd",
-                    "nfs": "nfs-kernel-server",
-                    "ssh": "ssh",
-                    "docker": "docker",
-                    "nginx": "nginx",
-                    "omv": "openmediavault-engined",
-                    "salt": "salt-minion",
-                    "openmediavault-pwmfan": "openmediavault-pwmfan",
-                    "omv-pwmfan": "openmediavault-pwmfan",
-                    "omvpwmfan": "openmediavault-pwmfan",
-                    "pwmfan": "openmediavault-pwmfan",
-                    "freenove": "freenove-case-pro",
-                    "pwm": "freenove-case-pro",
-                    "fan": "freenove-case-pro",
-                    "pihole": "pihole-FTL",
-                    "jellyfin": "jellyfin",
-                    "monit": "monit",
-                    "collectd": "collectd",
-                    "avahi": "avahi-daemon",
-                    "darkstat": "darkstat",
-                    "chrony": "chrony",
-                    "bluetooth": "bluetooth",
-                }
-                q_lower = question.lower()
-                svc_name = None
-                for alias, real in _alias.items():
-                    if alias in q_lower:
-                        svc_name = real
-                        break
-
-            # Final alias resolution — runs regardless of how svc_name was obtained
+            q_lower = question.lower()
+            _alias = {
+                "smb": "smbd", "samba": "smbd",
+                "nfs": "nfs-kernel-server",
+                "ssh": "ssh",
+                "docker": "docker",
+                "nginx": "nginx",
+                "omv": "openmediavault-engined",
+                "salt": "salt-minion",
+                "openmediavault-pwmfan": "openmediavault-pwmfan",
+                "omv-pwmfan": "openmediavault-pwmfan",
+                "omvpwmfan": "openmediavault-pwmfan",
+                "pwmfan": "openmediavault-pwmfan",
+                "freenove": "freenove-case-pro",
+                "pwm": "freenove-case-pro",
+                "fan": "freenove-case-pro",
+                "pihole": "pihole-FTL",
+                "jellyfin": "jellyfin",
+                "monit": "monit",
+                "collectd": "collectd",
+                "avahi": "avahi-daemon",
+                "darkstat": "darkstat",
+                "chrony": "chrony",
+                "bluetooth": "bluetooth",
+                "suricata": "suricata",
+                "evebox": "evebox",
+            }
             _canonical = {
                 "omv-pwmfan": "openmediavault-pwmfan",
                 "omvpwmfan": "openmediavault-pwmfan",
@@ -641,10 +630,74 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 "nfs-kernel-server": "nfs-kernel-server",
                 "openmediavault-engined": "openmediavault-engined",
             }
+
+            # 1. Try to extract exact .service name
+            m = re.search(r'([\w][\w\-\.]*[\w])\.service', question, re.IGNORECASE)
+            if m:
+                raw = m.group(1)
+                # strip redundant .service-within-name artefacts
+                svc_name = raw.rstrip(".")
+            else:
+                # 2. Map common aliases to real service names
+                svc_name = None
+                for alias, real in _alias.items():
+                    if alias in q_lower:
+                        svc_name = real
+                        break
+
+                if svc_name is None:
+                    tokens = set(re.findall(r'\b[a-z0-9][a-z0-9._-]{2,}\b', q_lower))
+                    for known in list(statuses.keys()):
+                        known_l = known.lower().replace(".service", "")
+                        if known_l in tokens or known_l in q_lower:
+                            svc_name = known_l
+                            break
+
+            # Final alias resolution — runs regardless of how svc_name was obtained
             if svc_name and svc_name.lower() in _canonical:
                 svc_name = _canonical[svc_name.lower()]
 
+            svc_names = []
             if svc_name:
+                svc_names.append(svc_name)
+            for alias, real in _alias.items():
+                if alias in q_lower:
+                    svc_names.append(_canonical.get(real.lower(), real))
+            for known in list(statuses.keys()):
+                known_l = known.lower().replace(".service", "")
+                if known_l in q_lower:
+                    svc_names.append(_canonical.get(known_l, known_l))
+
+            deduped = []
+            for name in svc_names:
+                if name and name not in deduped:
+                    deduped.append(name)
+
+            if deduped:
+                divider = "─" * 40
+                parts = []
+                for name in deduped:
+                    status = statuses.get(name)
+                    if status is None:
+                        if name.lower() in running_list.lower():
+                            status = "active"
+                        else:
+                            status = "inactive"
+
+                    icon = "✅" if status == "active" else ("❌" if status == "failed" else "⏸")
+                    parts.append(f"{icon} {name}: {status}")
+
+                title = "Service Status" if len(parts) == 1 else "Service Statuses"
+                answer = f"{title}\n{divider}\n" + "\n".join(parts)
+                if any(w in q_lower for w in ("log", "logging", "journal", "eve.json", "evebox")):
+                    answer += (
+                        f"\n\nLog checks\n{divider}\n"
+                        f"• Suricata service logs: journalctl -u suricata -n 50\n"
+                        f"• Suricata events: check /var/log/suricata/eve.json\n"
+                        f"• EveBox service logs: journalctl -u evebox -n 50"
+                    )
+                return answer
+            elif svc_name:
                 status = statuses.get(svc_name)
                 if status is None:
                     # Fall back: search the running-services string

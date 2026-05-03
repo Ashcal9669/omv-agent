@@ -28,7 +28,7 @@ Environment=OMV_AGENT_DB=/var/lib/omv-agent/brain.db
 Environment=OMV_AGENT_KNOWLEDGE=/usr/share/omv-agent/knowledge/knowledge_base.json
 Environment=OMV_AGENT_OLLAMA_ENABLED=0
 Environment=OMV_AGENT_OLLAMA_URL=http://127.0.0.1:11434
-Environment=OMV_AGENT_OLLAMA_TIMEOUT=8
+Environment=OMV_AGENT_OLLAMA_TIMEOUT=25
 
 # Security hardening — MED-6: Full systemd isolation
 NoNewPrivileges=yes

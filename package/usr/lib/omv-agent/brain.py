@@ -63,7 +63,7 @@ RELEVANT_KEYWORDS = {
     # Agent self-awareness / capability queries
     "agent", "capability", "capabilities", "feature", "features",
     "what can", "what do you", "help me", "yourself", "about you",
-    "version", "changelog",
+    "version", "changelog", "suricata", "evebox",
 }
 
 # Triggers that mark a suggestion as a system change (requires warning)
@@ -91,6 +91,14 @@ SYSTEM_CHANGE_TRIGGERS = [
 
 MAX_SESSION_HISTORY = 50
 MAX_QUESTION_LENGTH = 500
+SEARCH_STOPWORDS = {
+    "about", "after", "again", "also", "and", "are", "asked", "can", "could",
+    "did", "does", "for", "from", "give", "has", "have", "how", "into", "is",
+    "it", "its", "let", "like", "look", "looking", "me", "my", "now", "of",
+    "on", "please", "show", "tell", "that", "the", "their", "them", "then",
+    "there", "this", "to", "was", "what", "when", "where", "whether", "why",
+    "with", "you", "your",
+}
 
 
 class Brain:
@@ -431,6 +439,48 @@ class Brain:
                                             r.get("score", 0)))
 
         return results[:top_k]
+
+    def is_confident_match(self, query: str, result: dict | None) -> bool:
+        """
+        Return True only when a knowledge result clearly matches the user's
+        wording. This prevents broad FTS OR searches from answering with an
+        unrelated KB article before the local Ollama fallback gets a chance.
+        """
+        if not result:
+            return False
+
+        query_terms = {
+            t for t in re.findall(r'\b[a-z0-9][a-z0-9._-]{2,}\b', query.lower())
+            if t not in SEARCH_STOPWORDS
+        }
+        if not query_terms:
+            return False
+
+        tags = []
+        try:
+            tags = json.loads(result.get("tags", "[]"))
+        except (TypeError, json.JSONDecodeError):
+            tags = []
+
+        title = str(result.get("title", "")).lower()
+        topic = str(result.get("topic", "")).lower()
+        content = str(result.get("content", "")).lower()
+        tag_text = " ".join(str(t).lower() for t in tags)
+        strong_text = f"{title} {topic} {tag_text}"
+        full_text = f"{strong_text} {content}"
+
+        strong_hits = {t for t in query_terms if t in strong_text}
+        full_hits = {t for t in query_terms if t in full_text}
+
+        if strong_hits:
+            return True
+
+        # For short natural questions, require the meaningful term to appear in
+        # title/topic/tags. For longer questions, a content-only match must
+        # cover most meaningful terms; otherwise Qwen should handle the miss.
+        return len(query_terms) >= 3 and (
+            len(full_hits) / max(len(query_terms), 1)
+        ) >= 0.75
 
     def is_system_change(self, content: str) -> tuple:
         """

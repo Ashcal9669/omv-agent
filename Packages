@@ -1,5 +1,5 @@
 Package: openmediavault-agent
-Version: 1.6.3
+Version: 1.6.4
 Architecture: all
 Maintainer: OMV Agent Project <omv-agent@localhost>
 Installed-Size: 256
@@ -29,8 +29,8 @@ Description: OMV Intelligent Agent Helper
 Section: admin
 Priority: optional
 Homepage: https://github.com/Ashcal9669/omv-agent
-Filename: dist/openmediavault-agent_1.6.3_all.deb
-Size: 145158
-MD5sum: 8efb9f1416da35a8dd383267a36dfe9b
-SHA1: f5594b31919fbb70eedcbdd7e733fd14353c7b48
-SHA256: ef850d593490a39a9258366b824ba11a2534102403c522580dd852dbaa26b648
+Filename: dist/openmediavault-agent_1.6.4_all.deb
+Size: 149324
+MD5sum: 6d0d5a940146ed4f4cc005c56d503ecb
+SHA1: 5229cd6625b7901f15131241b67f3e9d3f5ee069
+SHA256: d72d9afabffb48c467fec47a6d3088c085eb401a0c057406669f0aeadb623123

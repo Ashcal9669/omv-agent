@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.6.3"
+VERSION = "1.6.4"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -317,7 +317,9 @@ def query():
     # Search knowledge base using enriched question for better context matching
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
 
-    if not results:
+    confident_results = results if results and brain.is_confident_match(enriched_q, results[0]) else []
+
+    if not confident_results:
         ollama_answer = answer_question(enriched_q, context_page=context_page)
         if ollama_answer:
             answer = ollama_answer
@@ -331,18 +333,18 @@ def query():
             sources = []
     else:
         # Build answer from top result(s)
-        primary = results[0]
+        primary = confident_results[0]
         answer_parts = [f"**{primary['title']}**\n\n{primary['content']}"]
 
-        if len(results) > 1:
-            related_titles = [r["title"] for r in results[1:]]
+        if len(confident_results) > 1:
+            related_titles = [r["title"] for r in confident_results[1:]]
             answer_parts.append(
                 "\n\n**Related topics:** " + ", ".join(related_titles)
             )
 
         answer = "\n".join(answer_parts)
         sources = [{"id": r["id"], "title": r["title"], "topic": r["topic"]}
-                   for r in results]
+                   for r in confident_results]
 
     # System change detection
     is_sys_change, warning_msg = brain.is_system_change(answer)

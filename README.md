@@ -35,7 +35,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.6.3_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.6.4_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -60,4 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.6.3` - Routes typo-tolerant health and anomaly questions to live probes without requiring Ollama
+`1.6.4` - Uses confident KB matching before fallback, waits for local Ollama on KB misses, and recognizes Suricata/EveBox service queries
