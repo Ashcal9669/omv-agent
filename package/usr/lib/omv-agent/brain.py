@@ -58,7 +58,8 @@ RELEVANT_KEYWORDS = {
     # Anomaly / health queries
     "anomaly", "anomalies", "abnormal", "abnormality", "abnormalities",
     "alert", "alerts", "detect", "detected", "since boot", "boot",
-    "hiccup", "problem", "issue", "issues",
+    "hiccup", "problem", "issue", "issues", "anomil", "anomol",
+    "anything wrong", "everything ok", "all good", "concern", "concerns",
     # Agent self-awareness / capability queries
     "agent", "capability", "capabilities", "feature", "features",
     "what can", "what do you", "help me", "yourself", "about you",

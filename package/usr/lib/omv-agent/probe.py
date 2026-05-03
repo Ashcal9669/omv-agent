@@ -200,9 +200,12 @@ def detect_query_type(question: str) -> str | None:
         return "services"
 
     # ── Anomalies / system health ────────────────────────────────────────────
-    if any(w in q for w in ["anomaly", "anomalies", "alert", "alerts",
-                              "problem", "problems", "issue", "issues",
-                              "abnormal", "hiccup", "system health"]):
+    if any(w in q for w in ["anomaly", "anomalies", "anomil", "anomol",
+                              "alert", "alerts", "problem", "problems",
+                              "issue", "issues", "abnormal", "hiccup",
+                              "system health", "anything wrong",
+                              "everything ok", "all good", "concern",
+                              "concerns"]):
         return "anomalies"
 
     return None
@@ -251,7 +254,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
     if probe_type == "capabilities":
         divider = "─" * 48
         return (
-            f"OMV Agent v1.6.2 — What I Can Help With\n{divider}\n"
+            f"OMV Agent v1.6.3 — What I Can Help With\n{divider}\n"
             f"Live System Data (real-time from probe daemon):\n"
             f"  • Drive temperatures — NVMe, SATA, HDD\n"
             f"  • CPU / SoC temperature\n"
