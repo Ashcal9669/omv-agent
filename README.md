@@ -12,6 +12,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 - **Off-topic rejection** — only answers OMV / NAS / Linux questions
 - **System change gate** — any suggestion involving a system change requires explicit confirmation before being shown
 - **Fully offline** — no external API calls, no cloud dependency
+- **Local Ollama fallback** — optional loopback-only Qwen/Ollama interpreter for natural phrasing
 
 ## Architecture
 
@@ -34,11 +35,13 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.5.1_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.6.0_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
 **Requirements:** OpenMediaVault 8, Python 3.9+, python3-flask, nginx
+
+**Optional Ollama:** disabled by default. To enable the local fallback, run Ollama on `127.0.0.1:11434`, set `OMV_AGENT_OLLAMA_ENABLED=1` via a systemd override for `omv-agent.service`, and optionally set `OMV_AGENT_OLLAMA_MODEL`. The bridge only accepts loopback Ollama URLs.
 
 ## Build
 
@@ -52,8 +55,9 @@ bash build.sh
 - All system change suggestions are **gated behind a confirmation dialog**
 - The watcher daemon runs with **zero capabilities**, `PrivateNetwork=yes`, `ProtectSystem=strict`
 - Flask backend rejects all requests not originating from nginx on loopback (`127.0.0.1`)
+- Flask backend systemd policy allows network traffic only to localhost for nginx/Ollama
 - All user input is sanitized; responses rendered via `textContent` only (no `innerHTML`)
 
 ## Version
 
-`1.5.1` - Detailed live probes, safer text rendering, watcher/discovery services, event queue, and updated OMV 8 knowledge base
+`1.6.0` - Optional loopback-only Ollama fallback for human phrasing, deterministic live probes, and aligned package metadata

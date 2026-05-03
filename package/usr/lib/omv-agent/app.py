@@ -25,6 +25,7 @@ from flask import Flask, request, jsonify, abort
 # Add parent dir to path
 sys.path.insert(0, os.path.dirname(__file__))
 from brain import Brain
+from ollama_bridge import answer_question, interpret_question
 from probe import detect_query_type, run_probe
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -35,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.5.1"
+VERSION = "1.6.0"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -226,20 +227,6 @@ def query():
     ctx = _get_ctx(session_id)
     enriched_q = _enrich(question, ctx)
 
-    # Relevance check on enriched question (allows "why?" after NVMe query to pass)
-    if not brain.is_relevant(enriched_q):
-        return jsonify({
-            "answer": (
-                "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
-                "I can't help with that topic, but I'm happy to answer questions about "
-                "your NAS, filesystems, network shares, disk management, or OMV settings."
-            ),
-            "is_system_change": False,
-            "warning_message": "",
-            "already_answered": False,
-            "sources": [],
-        })
-
     # Deduplication check (always on the original question, not enriched)
     q_hash = Brain.hash_question(session_id, question)
     previous = brain.was_already_answered(session_id, q_hash)
@@ -252,11 +239,53 @@ def query():
             "sources": [],
         })
 
-    # Live system probe — route using enriched question, run probe with original
-    # (probe handlers extract device names from the question text via regex)
+    probe_question = question
+
+    # Relevance check on enriched question (allows "why?" after NVMe query to pass).
+    # If the keyword gate misses a human phrasing, ask local Ollama to rewrite it
+    # into a routeable OMV/NAS/Linux query before refusing.
+    if not brain.is_relevant(enriched_q):
+        ollama = interpret_question(question, context_page=context_page)
+        if ollama and ollama.get("in_scope"):
+            rewritten_q = str(ollama.get("rewritten_question", "")).strip()
+            enriched_q = _enrich(rewritten_q or question, ctx)
+            probe_question = rewritten_q or question
+
+            if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
+                answer = str(ollama.get("answer", "")).strip() or (
+                    "I understand this as an OMV/NAS question, but I don't have "
+                    "enough local data to answer it precisely."
+                )
+                is_sys_change, warning_msg = brain.is_system_change(answer)
+                brain.record_answer(session_id, q_hash, answer)
+                _store_ctx(session_id, question, answer)
+                return jsonify({
+                    "answer": answer,
+                    "is_system_change": is_sys_change,
+                    "warning_message": warning_msg,
+                    "already_answered": False,
+                    "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
+                })
+        else:
+            answer = (
+                str((ollama or {}).get("answer", "")).strip()
+                or "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
+                   "I can't help with that topic, but I'm happy to answer questions about "
+                   "your NAS, filesystems, network shares, disk management, or OMV settings."
+            )
+            return jsonify({
+                "answer": answer,
+                "is_system_change": False,
+                "warning_message": "",
+                "already_answered": False,
+                "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}] if ollama else [],
+            })
+
+    # Live system probe — route using enriched/rephrased question when needed.
+    # Probe handlers extract device names from the question text via regex.
     probe_type = detect_query_type(enriched_q)
     if probe_type:
-        probe_answer = run_probe(probe_type, question)
+        probe_answer = run_probe(probe_type, probe_question)
         if probe_answer:
             is_sys_change, warning_msg = brain.is_system_change(probe_answer)
             brain.record_answer(session_id, q_hash, probe_answer)
@@ -273,12 +302,17 @@ def query():
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
 
     if not results:
-        answer = (
-            "I don't have specific information about that in my knowledge base. "
-            "For detailed help, check the official OpenMediaVault documentation at "
-            "https://docs.openmediavault.org or the OMV community forum."
-        )
-        sources = []
+        ollama_answer = answer_question(enriched_q, context_page=context_page)
+        if ollama_answer:
+            answer = ollama_answer
+            sources = [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}]
+        else:
+            answer = (
+                "I don't have specific information about that in my knowledge base. "
+                "For detailed help, check the official OpenMediaVault documentation at "
+                "https://docs.openmediavault.org or the OMV community forum."
+            )
+            sources = []
     else:
         # Build answer from top result(s)
         primary = results[0]

@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
 VER_DIR="$SCRIPT_DIR/versions"
-VERSION="1.5.2"
+VERSION="1.6.0"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 sync_control_version() {
@@ -172,6 +172,7 @@ fi
 REQUIRED=(
     "usr/lib/omv-agent/app.py"
     "usr/lib/omv-agent/brain.py"
+    "usr/lib/omv-agent/ollama_bridge.py"
     "usr/lib/omv-agent/probe.py"
     "usr/lib/omv-agent/probe_cache.py"
     "usr/lib/omv-agent/widget.js"

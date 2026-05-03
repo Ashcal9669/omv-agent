@@ -1,5 +1,5 @@
 Package: openmediavault-agent
-Version: 1.5.2
+Version: 1.6.0
 Architecture: all
 Maintainer: OMV Agent Project <omv-agent@localhost>
 Installed-Size: 256
@@ -22,6 +22,7 @@ Description: OMV Intelligent Agent Helper
   - Off-topic rejection (only answers OMV/NAS/Linux questions)
   - System change warnings with confirmation gate
   - Live system probes: drive temps, RAID status, load, disk usage
+  - Optional loopback-only local Ollama fallback for human phrasing
   - Fully offline — no external API calls
  .
  Supports ARM64 and AMD64 (Architecture: all).
