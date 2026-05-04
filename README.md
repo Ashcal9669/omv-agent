@@ -60,4 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.6.4` - Uses confident KB matching before fallback, waits for local Ollama on KB misses, and recognizes Suricata/EveBox service queries
+`1.6.4` - Uses confident KB matching before fallback, waits for local Ollama on KB misses.
