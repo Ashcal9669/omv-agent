@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.6.4"
+VERSION = "1.6.7"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -121,6 +121,33 @@ def _enrich(question: str, ctx: list) -> str:
     # Prepend up to the last 2 prior questions as context hints
     ctx_qs = [t[0] for t in ctx[-2:]]
     return ". ".join(ctx_qs) + ". " + question
+
+
+def _is_agent_alert_query(question: str) -> bool:
+    """
+    Detect direct questions about the OMV Agent's own warnings, badge, or alerts.
+
+    These are always in-scope and should route to the anomalies/event path even
+    if the broader relevance gate finds the phrasing too human or indirect.
+    """
+    q = str(question or "").lower().strip()
+    if not q:
+        return False
+
+    alert_terms = (
+        "warning", "warnings", "warn", "warns",
+        "alert", "alerts", "anomaly", "anomalies",
+        "badge", "notification", "notifications",
+        "event", "events", "issue", "issues",
+    )
+    agent_terms = (
+        "omv-agent", "omv agent", "agent", "helper",
+        "you keep giving", "you are giving", "you keep showing",
+        "where is", "where are", "what are", "what is",
+        "show me", "tell me", "why are you", "why do you",
+    )
+
+    return any(a in q for a in alert_terms) and any(t in q for t in agent_terms)
 
 
 # ── Middleware ────────────────────────────────────────────────────────────────
@@ -226,6 +253,7 @@ def query():
     # Session context — enrich follow-up questions with prior turn context
     ctx = _get_ctx(session_id)
     enriched_q = _enrich(question, ctx)
+    agent_alert_query = _is_agent_alert_query(question) or _is_agent_alert_query(enriched_q)
 
     # Deduplication check (always on the original question, not enriched)
     q_hash = Brain.hash_question(session_id, question)
@@ -245,7 +273,7 @@ def query():
     # Relevance check on enriched question (allows "why?" after NVMe query to pass).
     # If the keyword gate misses a human phrasing, ask local Ollama to rewrite it
     # into a routeable OMV/NAS/Linux query before refusing.
-    if not brain.is_relevant(enriched_q):
+    if not brain.is_relevant(enriched_q) and not agent_alert_query:
         ollama_interpretation = interpret_question(question, context_page=context_page)
         if ollama_interpretation and ollama_interpretation.get("in_scope"):
             rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
@@ -268,6 +296,18 @@ def query():
                     "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
                 })
         else:
+            answer = answer_question(question, context_page=context_page)
+            if answer:
+                brain.record_answer(session_id, q_hash, answer)
+                _store_ctx(session_id, question, answer)
+                return jsonify({
+                    "answer": answer,
+                    "is_system_change": False,
+                    "warning_message": "",
+                    "already_answered": False,
+                    "sources": [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}],
+                })
+
             answer = (
                 str((ollama_interpretation or {}).get("answer", "")).strip()
                 or "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
@@ -284,7 +324,7 @@ def query():
 
     # Live system probe — route using enriched/rephrased question when needed.
     # Probe handlers extract device names from the question text via regex.
-    probe_type = detect_query_type(enriched_q)
+    probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
     if not probe_type:
         # If Ollama is explicitly enabled, let it clarify broad human phrasing
         # before the FTS knowledge search can latch onto an unrelated keyword.

@@ -35,7 +35,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.6.4_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.6.7_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -60,4 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.6.4` - Uses confident KB matching before fallback, waits for local Ollama on KB misses.
+`1.6.7` - Cleans the public repo release metadata, updates moderator-facing package notes, and syncs the root release artifact to the current build so the repository no longer advertises stale package versions

@@ -50,6 +50,22 @@ def detect_query_type(question: str) -> str | None:
     """
     q = question.lower()
 
+    # ── Agent warning / badge / event questions (must be early) ────────────
+    if (
+        any(w in q for w in [
+            "warning", "warnings", "warn", "warns",
+            "alert", "alerts", "anomaly", "anomalies",
+            "badge", "notification", "notifications",
+            "event", "events",
+        ])
+        and any(w in q for w in [
+            "agent", "omv-agent", "omv agent", "helper",
+            "where is", "where are", "what are", "what is",
+            "show me", "tell me", "you keep giving", "you keep showing",
+        ])
+    ):
+        return "anomalies"
+
     # ── Agent capabilities / self-description (must come FIRST) ─────────────
     if any(p in q for p in ["what can you", "what can u", "what do you do",
                               "your capabilities", "your features", "what are you",
@@ -204,7 +220,8 @@ def detect_query_type(question: str) -> str | None:
 
     # ── Anomalies / system health ────────────────────────────────────────────
     if any(w in q for w in ["anomaly", "anomalies", "anomil", "anomol",
-                              "alert", "alerts", "problem", "problems",
+                              "alert", "alerts", "warning", "warnings",
+                              "warn", "warns", "problem", "problems",
                               "issue", "issues", "abnormal", "hiccup",
                               "system health", "anything wrong",
                               "everything ok", "all good", "concern",
@@ -257,7 +274,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
     if probe_type == "capabilities":
         divider = "─" * 48
         return (
-            f"OMV Agent v1.6.4 — What I Can Help With\n{divider}\n"
+            f"OMV Agent v1.6.7 — What I Can Help With\n{divider}\n"
             f"Live System Data (real-time from probe daemon):\n"
             f"  • Drive temperatures — NVMe, SATA, HDD\n"
             f"  • CPU / SoC temperature\n"

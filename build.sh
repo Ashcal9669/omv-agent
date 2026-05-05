@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
 VER_DIR="$SCRIPT_DIR/versions"
-VERSION="1.6.4"
+VERSION="1.6.7"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 sync_control_version() {
@@ -63,6 +63,13 @@ SHA256:
  $packages_sha256 $packages_size Packages
  $packages_gz_sha256 $packages_gz_size Packages.gz
 EOF
+}
+
+sync_root_artifact() {
+    local pkg_path="$OUT_DIR/$PKG_NAME"
+
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name 'openmediavault-agent_*.deb' -delete
+    cp -f "$pkg_path" "$SCRIPT_DIR/$PKG_NAME"
 }
 
 build_deb_package() {
@@ -203,8 +210,11 @@ sync_control_version
 echo "[6/7] Building .deb package..."
 build_deb_package
 
-echo "[7/7] Refreshing repository metadata..."
+echo "[7/8] Refreshing repository metadata..."
 write_repo_metadata
+
+echo "[8/8] Syncing root release artifact..."
+sync_root_artifact
 
 echo ""
 echo "=== BUILD SUCCESSFUL ==="

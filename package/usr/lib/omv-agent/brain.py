@@ -57,7 +57,9 @@ RELEVANT_KEYWORDS = {
     "ping", "route", "subnet", "vlan", "bridge", "bond",
     # Anomaly / health queries
     "anomaly", "anomalies", "abnormal", "abnormality", "abnormalities",
-    "alert", "alerts", "detect", "detected", "since boot", "boot",
+    "alert", "alerts", "warning", "warnings", "warn", "warns",
+    "badge", "badges", "event", "events",
+    "detect", "detected", "since boot", "boot",
     "hiccup", "problem", "issue", "issues", "anomil", "anomol",
     "anything wrong", "everything ok", "all good", "concern", "concerns",
     # Agent self-awareness / capability queries
