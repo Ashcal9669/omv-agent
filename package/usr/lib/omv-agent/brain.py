@@ -66,6 +66,7 @@ RELEVANT_KEYWORDS = {
     "agent", "capability", "capabilities", "feature", "features",
     "what can", "what do you", "help me", "yourself", "about you",
     "version", "changelog", "suricata", "evebox",
+    "pi", "raspberry", "hot", "temp",
 }
 
 # Triggers that mark a suggestion as a system change (requires warning)

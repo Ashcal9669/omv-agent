@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.6.7"
+VERSION = "1.6.8"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -269,58 +269,65 @@ def query():
 
     probe_question = question
     ollama_interpretation = None
+    stored_ollama_answer = None
 
     # Relevance check on enriched question (allows "why?" after NVMe query to pass).
     # If the keyword gate misses a human phrasing, ask local Ollama to rewrite it
     # into a routeable OMV/NAS/Linux query before refusing.
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
         ollama_interpretation = interpret_question(question, context_page=context_page)
-        if ollama_interpretation and ollama_interpretation.get("in_scope"):
-            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
-            enriched_q = _enrich(rewritten_q or question, ctx)
-            probe_question = rewritten_q or question
+        if ollama_interpretation:
+            stored_ollama_answer = ollama_interpretation.get("answer")
+            if ollama_interpretation.get("in_scope"):
+                rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
+                enriched_q = _enrich(rewritten_q or question, ctx)
+                probe_question = rewritten_q or question
 
-            if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
-                answer = str(ollama_interpretation.get("answer", "")).strip() or (
-                    "I understand this as an OMV/NAS question, but I don't have "
-                    "enough local data to answer it precisely."
+                if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
+                    answer = str(stored_ollama_answer).strip() or (
+                        "I understand this as an OMV/NAS question, but I don't have "
+                        "enough local data to answer it precisely."
+                    )
+                    is_sys_change, warning_msg = brain.is_system_change(answer)
+                    brain.record_answer(session_id, q_hash, answer)
+                    _store_ctx(session_id, question, answer)
+                    return jsonify({
+                        "answer": answer,
+                        "is_system_change": is_sys_change,
+                        "warning_message": warning_msg,
+                        "already_answered": False,
+                        "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
+                    })
+            else:
+                # If we have a stored answer from interpretation, use it instead of calling answer_question again
+                answer = str(stored_ollama_answer).strip()
+                if not answer or "specialized" in answer.lower():
+                     # try one last bounded answer if interpretation was just a refusal
+                     answer = answer_question(question, context_page=context_page)
+                
+                if answer:
+                    brain.record_answer(session_id, q_hash, answer)
+                    _store_ctx(session_id, question, answer)
+                    return jsonify({
+                        "answer": answer,
+                        "is_system_change": False,
+                        "warning_message": "",
+                        "already_answered": False,
+                        "sources": [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}],
+                    })
+
+                answer = (
+                    "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
+                    "I can't help with that topic, but I'm happy to answer questions about "
+                    "your NAS, filesystems, network shares, disk management, or OMV settings."
                 )
-                is_sys_change, warning_msg = brain.is_system_change(answer)
-                brain.record_answer(session_id, q_hash, answer)
-                _store_ctx(session_id, question, answer)
-                return jsonify({
-                    "answer": answer,
-                    "is_system_change": is_sys_change,
-                    "warning_message": warning_msg,
-                    "already_answered": False,
-                    "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
-                })
-        else:
-            answer = answer_question(question, context_page=context_page)
-            if answer:
-                brain.record_answer(session_id, q_hash, answer)
-                _store_ctx(session_id, question, answer)
                 return jsonify({
                     "answer": answer,
                     "is_system_change": False,
                     "warning_message": "",
                     "already_answered": False,
-                    "sources": [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}],
+                    "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
                 })
-
-            answer = (
-                str((ollama_interpretation or {}).get("answer", "")).strip()
-                or "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
-                   "I can't help with that topic, but I'm happy to answer questions about "
-                   "your NAS, filesystems, network shares, disk management, or OMV settings."
-            )
-            return jsonify({
-                "answer": answer,
-                "is_system_change": False,
-                "warning_message": "",
-                "already_answered": False,
-                "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}] if ollama_interpretation else [],
-            })
 
     # Live system probe — route using enriched/rephrased question when needed.
     # Probe handlers extract device names from the question text via regex.
@@ -330,6 +337,9 @@ def query():
         # before the FTS knowledge search can latch onto an unrelated keyword.
         if ollama_interpretation is None:
             ollama_interpretation = interpret_question(question, context_page=context_page)
+            if ollama_interpretation:
+                stored_ollama_answer = ollama_interpretation.get("answer")
+        
         if ollama_interpretation and ollama_interpretation.get("in_scope"):
             rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
             if rewritten_q and rewritten_q.lower() != enriched_q.lower():
@@ -360,7 +370,11 @@ def query():
     confident_results = results if results and brain.is_confident_match(enriched_q, results[0]) else []
 
     if not confident_results:
-        ollama_answer = answer_question(enriched_q, context_page=context_page)
+        # Prefer reusing interpretation answer if available
+        ollama_answer = str(stored_ollama_answer).strip() if stored_ollama_answer else None
+        if not ollama_answer or "specialized" in ollama_answer.lower():
+            ollama_answer = answer_question(enriched_q, context_page=context_page)
+        
         if ollama_answer:
             answer = ollama_answer
             sources = [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}]

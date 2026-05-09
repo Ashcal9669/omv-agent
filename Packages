@@ -29,7 +29,7 @@ Description: OMV Intelligent Agent Helper
 Section: admin
 Priority: optional
 Homepage: https://github.com/Ashcal9669/omv-agent
-Filename: dist/openmediavault-agent_1.6.7_all.deb
+Filename: dist/openmediavault-agent_1.6.8_all.deb
 Size: 151536
 MD5sum: 8a6feeaa466312ba55b8c050879b2118
 SHA1: 040a3fee70703077d1c8ad14ef7751559aedca44

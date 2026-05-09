@@ -1,6 +1,6 @@
 # openmediavault-agent — Moderator Review Request
 
-**Package:** `openmediavault-agent` v1.6.7
+**Package:** `openmediavault-agent` v1.6.8
 **GitHub:** https://github.com/Ashcal9669/omv-agent
 **Requires:** OMV 8, Debian Bookworm/Trixie, ARM64 + AMD64
 
@@ -87,4 +87,4 @@ sudo nginx -t && sudo systemctl reload nginx
 
 Source is fully public. Nothing compiled or obfuscated. Happy to answer any questions.
 
-*v1.6.7 — May 2026*
+*v1.6.8 — May 2026*

@@ -35,7 +35,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.6.7_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.6.8_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -60,4 +60,6 @@ bash build.sh
 
 ## Version
 
-`1.6.7` - Cleans the public repo release metadata, updates moderator-facing package notes, and syncs the root release artifact to the current build so the repository no longer advertises stale package versions
+`1.6.8` - Optimizes the Ollama integration, increases timeouts, and improves relevance filtering
+
+`1.6.8` - Optimizes the Ollama integration by increasing timeouts to 45s, reusing interpretation results to prevent redundant calls, increasing prediction limits to 1024, and expanding relevance keywords to include common natural language terms like "pi" and "hot".

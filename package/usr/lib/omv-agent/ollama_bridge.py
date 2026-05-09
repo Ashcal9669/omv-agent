@@ -15,7 +15,7 @@ import urllib.request
 
 OLLAMA_URL = os.environ.get("OMV_AGENT_OLLAMA_URL", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.environ.get("OMV_AGENT_OLLAMA_MODEL", "")
-OLLAMA_TIMEOUT = float(os.environ.get("OMV_AGENT_OLLAMA_TIMEOUT", "25"))
+OLLAMA_TIMEOUT = float(os.environ.get("OMV_AGENT_OLLAMA_TIMEOUT", "45"))
 OLLAMA_ENABLED = os.environ.get("OMV_AGENT_OLLAMA_ENABLED", "0").lower() in {
     "1", "true", "yes", "on"
 }
@@ -215,3 +215,4 @@ User question: {question}
     if not answer:
         return None
     return answer[:MAX_ANSWER_LEN]
+
