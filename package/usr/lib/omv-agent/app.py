@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.6.8"
+VERSION = "1.7.1"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -226,9 +226,6 @@ def boot_status():
 def query():
     """
     Main query endpoint.
-    Body: { "question": str, "context_page": str, "session_id": str }
-    Returns: { "answer": str, "is_system_change": bool, "warning_message": str,
-               "already_answered": bool, "sources": list }
     """
     try:
         data = request.get_json(force=False, silent=True) or {}
@@ -239,39 +236,21 @@ def query():
     context_page = str(data.get("context_page", "")).strip()[:200]
     session_id = sanitize_session_id(data.get("session_id", ""))
 
-    # Validate question (MED-3: byte-length enforcement)
     if not question:
         return error_response("Question cannot be empty")
-    if len(question.encode("utf-8")) > 2048:
-        return error_response("Question exceeds 2048 byte limit"), 413
-    if len(question) > MAX_QUESTION_LEN:
-        question = question[:MAX_QUESTION_LEN]
 
-    # Sanitize context_page to valid path-like string
-    context_page = re.sub(r"[^a-zA-Z0-9/\-_]", "", context_page)
-
-    # Session context — enrich follow-up questions with prior turn context
     ctx = _get_ctx(session_id)
     enriched_q = _enrich(question, ctx)
     agent_alert_query = _is_agent_alert_query(question) or _is_agent_alert_query(enriched_q)
 
-    # Deduplication check (always on the original question, not enriched)
     q_hash = Brain.hash_question(session_id, question)
     previous = brain.was_already_answered(session_id, q_hash)
     if previous:
-        return jsonify({
-            "answer": previous,
-            "is_system_change": False,
-            "warning_message": "",
-            "already_answered": True,
-            "sources": [],
-        })
+        return jsonify({"answer": previous, "is_system_change": False, "warning_message": "", "already_answered": True, "sources": []})
 
-    probe_question = question
     ollama_interpretation = None
     stored_ollama_answer = None
 
-    # Relevance check on enriched question (allows "why?" after NVMe query to pass).
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
         ollama_interpretation = interpret_question(question, context_page=context_page)
         if ollama_interpretation:
@@ -279,86 +258,40 @@ def query():
             if ollama_interpretation.get("in_scope"):
                 rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
                 enriched_q = _enrich(rewritten_q or question, ctx)
-                probe_question = rewritten_q or question
-
                 if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
-                    answer = str(stored_ollama_answer).strip() or (
-                        "I understand this as an OMV/NAS question, but I don’t have "
-                        "enough local data to answer it precisely."
-                    )
-                    is_sys_change, warning_msg = brain.is_system_change(answer)
-                    brain.record_answer(session_id, q_hash, answer)
-                    _store_ctx(session_id, question, answer)
-                    return jsonify({
-                        "answer": answer,
-                        "is_system_change": is_sys_change,
-                        "warning_message": warning_msg,
-                        "already_answered": False,
-                        "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
-                    })
+                    ans = str(stored_ollama_answer).strip() or "I understand this as OMV related but have no local data."
+                    return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
             else:
-                answer = str(stored_ollama_answer).strip()
-                if not answer or "specialized" in answer.lower():
-                    answer = answer_question(question, context_page=context_page)
-
-                if answer:
-                    brain.record_answer(session_id, q_hash, answer)
-                    _store_ctx(session_id, question, answer)
-                    return jsonify({
-                        "answer": answer,
-                        "is_system_change": False,
-                        "warning_message": "",
-                        "already_answered": False,
-                        "sources": [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}],
-                    })
-                return jsonify({
-                    "answer": "I’m specialized in OpenMediaVault, NAS management, and Linux storage.",
-                    "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []
-                })
+                ans = str(stored_ollama_answer).strip() or "I specialize in OMV, NAS and Linux storage."
+                return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
 
     probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
     if probe_type:
-        probe_answer = run_probe(probe_type, probe_question)
+        probe_answer = run_probe(probe_type, question)
         if probe_answer:
-            is_sys_change, warning_msg = brain.is_system_change(probe_answer)
             brain.record_answer(session_id, q_hash, probe_answer)
             _store_ctx(session_id, question, probe_answer)
-            return jsonify({
-                "answer": probe_answer,
-                "is_system_change": is_sys_change,
-                "warning_message": warning_msg,
-                "already_answered": False,
-                "sources": [{"id": "live-probe", "title": "Live System Data", "topic": "system"}],
-            })
+            return jsonify({"answer": probe_answer, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": [{"id": "live-probe", "title": "Live Data", "topic": "system"}]})
 
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
-    confident_results = results if results and brain.is_confident_match(enriched_q, results[0]) else []
+    confident = results if results and brain.is_confident_match(enriched_q, results[0]) else []
 
-    if not confident_results:
-        ollama_answer = str(stored_ollama_answer).strip() if stored_ollama_answer else None
-        if not ollama_answer or "specialized" in ollama_answer.lower():
-            ollama_answer = answer_question(enriched_q, context_page=context_page)
-        if ollama_answer:
-            answer = ollama_answer
-            sources = [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}]
-        else:
-            answer = "I don’t have specific information about that in my knowledge base."
-            sources = []
+    if not confident:
+        ans = str(stored_ollama_answer).strip() if stored_ollama_answer else None
+        if not ans or "specialized" in ans.lower():
+            ans = answer_question(enriched_q, context_page=context_page)
+        if not ans:
+            ans = "I do not have specific info in my knowledge base."
+        answer, sources = ans, []
     else:
-        primary = confident_results[0]
+        primary = confident[0]
         answer = f"**{primary['title']}**\n\n{primary['content']}"
-        sources = [{"id": r["id"], "title": r["title"], "topic": r["topic"]} for r in confident_results]
+        sources = [{"id": r['id'], "title": r['title'], "topic": r['topic']} for r in confident]
 
-    is_sys_change, warning_msg = brain.is_system_change(answer)
+    is_sys, warn = brain.is_system_change(answer)
     brain.record_answer(session_id, q_hash, answer)
     _store_ctx(session_id, question, answer)
-    return jsonify({
-        "answer": answer,
-        "is_system_change": is_sys_change,
-        "warning_message": warning_msg,
-        "already_answered": False,
-        "sources": sources,
-    })
+    return jsonify({"answer": answer, "is_system_change": is_sys, "warning_message": warn, "already_answered": False, "sources": sources})
 
 @app.route("/feedback", methods=["POST"])
 @require_json

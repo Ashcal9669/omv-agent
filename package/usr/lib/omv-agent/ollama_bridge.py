@@ -52,7 +52,7 @@ def _ollama_generate(prompt: str) -> str | None:
         "stream": False,
         "options": {
             "temperature": 0.1,
-            "num_predict": 320,
+            "num_predict": 1024,
         },
     }
     req = urllib.request.Request(
