@@ -60,6 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.6.8` - Optimizes the Ollama integration, increases timeouts, and improves relevance filtering
-
-`1.6.8` - Optimizes the Ollama integration by increasing timeouts to 45s, reusing interpretation results to prevent redundant calls, increasing prediction limits to 1024, and expanding relevance keywords to include common natural language terms like "pi" and "hot".
+`1.6.9` - Fixes the Ollama port mismatch (switching from 11434 to 11334 to match local service), expands live probe detection for short queries (load, stats, ps), and refactors the query engine to prioritize live data over weak knowledge base matches, preventing the generic gating issue.

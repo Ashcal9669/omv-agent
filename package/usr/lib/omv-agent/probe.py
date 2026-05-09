@@ -215,7 +215,10 @@ def detect_query_type(question: str) -> str | None:
 
     # ── All running services ─────────────────────────────────────────────────
     if any(p in q for p in ["what services are running", "running services",
-                              "services running", "active services", "all services"]):
+                              "services running", "active services", "all services",
+                              "list all active process", "active processes", "show processes"]):
+        return "services"
+    if q.strip().rstrip("?!. ") in ("services", "processes", "ps"):
         return "services"
 
     # ── Anomalies / system health ────────────────────────────────────────────
@@ -274,7 +277,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
     if probe_type == "capabilities":
         divider = "─" * 48
         return (
-            f"OMV Agent v1.6.8 — What I Can Help With\n{divider}\n"
+            f"OMV Agent v1.6.9 — What I Can Help With\n{divider}\n"
             f"Live System Data (real-time from probe daemon):\n"
             f"  • Drive temperatures — NVMe, SATA, HDD\n"
             f"  • CPU / SoC temperature\n"
@@ -860,5 +863,8 @@ def run_probe(probe_type: str, question: str) -> str | None:
 
     except Exception as e:
         return f"Probe error: {str(e)[:120]}"
+
+    return None
+Probe error: {str(e)[:120]}"
 
     return None

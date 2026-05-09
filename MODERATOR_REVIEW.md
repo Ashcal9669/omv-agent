@@ -1,6 +1,6 @@
 # openmediavault-agent — Moderator Review Request
 
-**Package:** `openmediavault-agent` v1.6.8
+**Package:** `openmediavault-agent` v1.6.9
 **GitHub:** https://github.com/Ashcal9669/omv-agent
 **Requires:** OMV 8, Debian Bookworm/Trixie, ARM64 + AMD64
 

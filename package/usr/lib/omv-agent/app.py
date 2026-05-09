@@ -331,25 +331,9 @@ def query():
 
     # Live system probe — route using enriched/rephrased question when needed.
     # Probe handlers extract device names from the question text via regex.
+    # We check probes FIRST because live data is always more accurate than KB docs.
     probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
-    if not probe_type:
-        # If Ollama is explicitly enabled, let it clarify broad human phrasing
-        # before the FTS knowledge search can latch onto an unrelated keyword.
-        if ollama_interpretation is None:
-            ollama_interpretation = interpret_question(question, context_page=context_page)
-            if ollama_interpretation:
-                stored_ollama_answer = ollama_interpretation.get("answer")
-        
-        if ollama_interpretation and ollama_interpretation.get("in_scope"):
-            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
-            if rewritten_q and rewritten_q.lower() != enriched_q.lower():
-                rewritten_enriched = _enrich(rewritten_q, ctx)
-                rewritten_probe = detect_query_type(rewritten_enriched)
-                if rewritten_probe:
-                    enriched_q = rewritten_enriched
-                    probe_question = rewritten_q
-                    probe_type = rewritten_probe
-
+    
     if probe_type:
         probe_answer = run_probe(probe_type, probe_question)
         if probe_answer:
@@ -367,10 +351,39 @@ def query():
     # Search knowledge base using enriched question for better context matching
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
 
+    # KB is only allowed to "gate" if it is a highly confident match.
+    # Otherwise, we proceed to Ollama/Rephrasing logic.
     confident_results = results if results and brain.is_confident_match(enriched_q, results[0]) else []
 
     if not confident_results:
-        # Prefer reusing interpretation answer if available
+        # If no confident KB match, and no probe triggered, ask Ollama.
+        # But first, check if Ollama interpretation provides a probe re-routing.
+        if ollama_interpretation is None:
+            ollama_interpretation = interpret_question(question, context_page=context_page)
+            if ollama_interpretation:
+                stored_ollama_answer = ollama_interpretation.get("answer")
+        
+        if ollama_interpretation and ollama_interpretation.get("in_scope"):
+            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
+            if rewritten_q and rewritten_q.lower() != enriched_q.lower():
+                rewritten_enriched = _enrich(rewritten_q, ctx)
+                rewritten_probe = detect_query_type(rewritten_enriched)
+                if rewritten_probe:
+                    # RE-ROUTE TO PROBE with rewritten query
+                    probe_answer = run_probe(rewritten_probe, rewritten_q)
+                    if probe_answer:
+                        brain.record_answer(session_id, q_hash, probe_answer)
+                        _store_ctx(session_id, question, probe_answer)
+                        return jsonify({
+                            "answer": probe_answer,
+                            "is_system_change": False,
+                            "warning_message": "",
+                            "already_answered": False,
+                            "sources": [{"id": "live-probe", "title": "Live System Data (via AI)", "topic": "system"}],
+                        })
+
+    # If we get here and have no confident results, try the fallback answer
+    if not confident_results:
         ollama_answer = str(stored_ollama_answer).strip() if stored_ollama_answer else None
         if not ollama_answer or "specialized" in ollama_answer.lower():
             ollama_answer = answer_question(enriched_q, context_page=context_page)
