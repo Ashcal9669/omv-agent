@@ -248,7 +248,7 @@ def query():
         question = question[:MAX_QUESTION_LEN]
 
     # Sanitize context_page to valid path-like string
-    context_page = re.sub(r'[^a-zA-Z0-9/\-_]', '', context_page)
+    context_page = re.sub(r"[^a-zA-Z0-9/\-_]", "", context_page)
 
     # Session context — enrich follow-up questions with prior turn context
     ctx = _get_ctx(session_id)
@@ -272,8 +272,6 @@ def query():
     stored_ollama_answer = None
 
     # Relevance check on enriched question (allows "why?" after NVMe query to pass).
-    # If the keyword gate misses a human phrasing, ask local Ollama to rewrite it
-    # into a routeable OMV/NAS/Linux query before refusing.
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
         ollama_interpretation = interpret_question(question, context_page=context_page)
         if ollama_interpretation:
@@ -285,7 +283,7 @@ def query():
 
                 if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
                     answer = str(stored_ollama_answer).strip() or (
-                        "I understand this as an OMV/NAS question, but I don't have "
+                        "I understand this as an OMV/NAS question, but I don’t have "
                         "enough local data to answer it precisely."
                     )
                     is_sys_change, warning_msg = brain.is_system_change(answer)
@@ -299,12 +297,10 @@ def query():
                         "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
                     })
             else:
-                # If we have a stored answer from interpretation, use it instead of calling answer_question again
                 answer = str(stored_ollama_answer).strip()
                 if not answer or "specialized" in answer.lower():
-                     # try one last bounded answer if interpretation was just a refusal
-                     answer = answer_question(question, context_page=context_page)
-                
+                    answer = answer_question(question, context_page=context_page)
+
                 if answer:
                     brain.record_answer(session_id, q_hash, answer)
                     _store_ctx(session_id, question, answer)
@@ -315,25 +311,12 @@ def query():
                         "already_answered": False,
                         "sources": [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}],
                     })
-
-                answer = (
-                    "I'm specialized in OpenMediaVault, NAS management, and Linux storage. "
-                    "I can't help with that topic, but I'm happy to answer questions about "
-                    "your NAS, filesystems, network shares, disk management, or OMV settings."
-                )
                 return jsonify({
-                    "answer": answer,
-                    "is_system_change": False,
-                    "warning_message": "",
-                    "already_answered": False,
-                    "sources": [{"id": "local-ollama", "title": "Local Ollama Interpreter", "topic": "system"}],
+                    "answer": "I’m specialized in OpenMediaVault, NAS management, and Linux storage.",
+                    "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []
                 })
 
-    # Live system probe — route using enriched/rephrased question when needed.
-    # Probe handlers extract device names from the question text via regex.
-    # We check probes FIRST because live data is always more accurate than KB docs.
     probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
-    
     if probe_type:
         probe_answer = run_probe(probe_type, probe_question)
         if probe_answer:
@@ -348,78 +331,27 @@ def query():
                 "sources": [{"id": "live-probe", "title": "Live System Data", "topic": "system"}],
             })
 
-    # Search knowledge base using enriched question for better context matching
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
-
-    # KB is only allowed to "gate" if it is a highly confident match.
-    # Otherwise, we proceed to Ollama/Rephrasing logic.
     confident_results = results if results and brain.is_confident_match(enriched_q, results[0]) else []
 
-    if not confident_results:
-        # If no confident KB match, and no probe triggered, ask Ollama.
-        # But first, check if Ollama interpretation provides a probe re-routing.
-        if ollama_interpretation is None:
-            ollama_interpretation = interpret_question(question, context_page=context_page)
-            if ollama_interpretation:
-                stored_ollama_answer = ollama_interpretation.get("answer")
-        
-        if ollama_interpretation and ollama_interpretation.get("in_scope"):
-            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
-            if rewritten_q and rewritten_q.lower() != enriched_q.lower():
-                rewritten_enriched = _enrich(rewritten_q, ctx)
-                rewritten_probe = detect_query_type(rewritten_enriched)
-                if rewritten_probe:
-                    # RE-ROUTE TO PROBE with rewritten query
-                    probe_answer = run_probe(rewritten_probe, rewritten_q)
-                    if probe_answer:
-                        brain.record_answer(session_id, q_hash, probe_answer)
-                        _store_ctx(session_id, question, probe_answer)
-                        return jsonify({
-                            "answer": probe_answer,
-                            "is_system_change": False,
-                            "warning_message": "",
-                            "already_answered": False,
-                            "sources": [{"id": "live-probe", "title": "Live System Data (via AI)", "topic": "system"}],
-                        })
-
-    # If we get here and have no confident results, try the fallback answer
     if not confident_results:
         ollama_answer = str(stored_ollama_answer).strip() if stored_ollama_answer else None
         if not ollama_answer or "specialized" in ollama_answer.lower():
             ollama_answer = answer_question(enriched_q, context_page=context_page)
-        
         if ollama_answer:
             answer = ollama_answer
             sources = [{"id": "local-ollama", "title": "Local Ollama fallback", "topic": "fallback"}]
         else:
-            answer = (
-                "I don't have specific information about that in my knowledge base. "
-                "For detailed help, check the official OpenMediaVault documentation at "
-                "https://docs.openmediavault.org or the OMV community forum."
-            )
+            answer = "I don’t have specific information about that in my knowledge base."
             sources = []
     else:
-        # Build answer from top result(s)
         primary = confident_results[0]
-        answer_parts = [f"**{primary['title']}**\n\n{primary['content']}"]
+        answer = f"**{primary['title']}**\n\n{primary['content']}"
+        sources = [{"id": r["id"], "title": r["title"], "topic": r["topic"]} for r in confident_results]
 
-        if len(confident_results) > 1:
-            related_titles = [r["title"] for r in confident_results[1:]]
-            answer_parts.append(
-                "\n\n**Related topics:** " + ", ".join(related_titles)
-            )
-
-        answer = "\n".join(answer_parts)
-        sources = [{"id": r["id"], "title": r["title"], "topic": r["topic"]}
-                   for r in confident_results]
-
-    # System change detection
     is_sys_change, warning_msg = brain.is_system_change(answer)
-
-    # Record in session history (dedup) and in-memory context (follow-up parsing)
     brain.record_answer(session_id, q_hash, answer)
     _store_ctx(session_id, question, answer)
-
     return jsonify({
         "answer": answer,
         "is_system_change": is_sys_change,
@@ -427,7 +359,6 @@ def query():
         "already_answered": False,
         "sources": sources,
     })
-
 
 @app.route("/feedback", methods=["POST"])
 @require_json

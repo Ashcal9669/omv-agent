@@ -30,7 +30,7 @@ Section: admin
 Priority: optional
 Homepage: https://github.com/Ashcal9669/omv-agent
 Filename: dist/openmediavault-agent_1.6.9_all.deb
-Size: 111182
-MD5sum: 7ee51df9b56f26f1cd4978befcf5b7fd
-SHA1: 89462744ef1134d82c9dbc7ee87242c40c838882
-SHA256: a7e14fadec230db3b1aee86d35330642b223d8ffc452473d25a7e598b3bf61ad
+Size: 109644
+MD5sum: be1213910128049c5effda2d2e094b68
+SHA1: bf636cf45ad39c673d97a6d10bf25a5bf99417e3
+SHA256: 96c912bee73fea9659d9d916ffbab2427635fd51f4e06e92a324278b353d6992
