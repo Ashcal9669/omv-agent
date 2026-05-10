@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.7.1"
+VERSION = "1.7.2"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -265,7 +265,8 @@ def query():
                 ans = str(stored_ollama_answer).strip() or "I specialize in OMV, NAS and Linux storage."
                 return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
 
-    probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
+    else:
+        probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
     if probe_type:
         probe_answer = run_probe(probe_type, question)
         if probe_answer:
