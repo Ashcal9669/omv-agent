@@ -5,12 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
 VER_DIR="$SCRIPT_DIR/versions"
-VERSION="1.7.2"
+VERSION="1.7.0"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 sync_control_version() {
     sed -i "" "s/^Version:.*/Version: $VERSION/" "$PKG_DIR/DEBIAN/control"
-    
 }
 
 write_repo_metadata() {
@@ -165,7 +164,8 @@ find "$PKG_DIR" -type f ! -path "*/DEBIAN/*" -exec chmod 644 {} \;
 # Keep DEBIAN scripts executable
 chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/prerm" \
-           "$PKG_DIR/DEBIAN/postrm"
+           "$PKG_DIR/DEBIAN/postrm" \
+           "$PKG_DIR/usr/local/bin/berrypi-boot-sequencer"
 
 # Validate control file
 echo "[4/7] Validating package structure..."
@@ -193,6 +193,8 @@ REQUIRED=(
     "usr/lib/omv-agent/discoverer.py"
     "usr/share/openmediavault/workbench/navigation.d/omv-agent.yaml"
     "usr/share/openmediavault/workbench/route.d/omv-agent.json"
+    "usr/local/bin/berrypi-boot-sequencer"
+    "etc/systemd/system/berrypi-boot-sequencer.service"
 )
 for f in "${REQUIRED[@]}"; do
     if [ ! -f "$PKG_DIR/$f" ]; then

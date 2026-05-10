@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_FILE="/var/log/berrypi-boot-sequencer.log"
+STAMP_DIR="/run/berrypi-sequencer"
+REPORT_DIR="/run/omv-agent"
+REPORT_FILE="${REPORT_DIR}/boot_report.json"
+EVEBOX_BASE="/srv/dev-disk-by-uuid-f9da6d25-a755-4ea2-991c-1fd0e91000b6/System_log/evebox"
+EVEBOX_DATA="${EVEBOX_BASE}/evebox_data"
+CONFIG_FILE="/etc/berrypi-sequencer.conf"
+if [[ -f "${CONFIG_FILE}" ]]; then
+    source "${CONFIG_FILE}"
+fi
+N8N_WEBHOOK_URL="${N8N_WEBHOOK_URL:-}"
+
+timestamp() {
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
+log() {
+    printf '%s %s\n' "$(timestamp)" "$*" >> "${LOG_FILE}"
+}
+
+BOOT_ID="$(cat /proc/sys/kernel/random/boot_id)"
+STAMP_FILE="${STAMP_DIR}/ran_${BOOT_ID}"
+
+mkdir -p "${STAMP_DIR}"
+
+if [[ "${BERRYPI_SEQUENCER_BACKGROUND:-0}" != "1" ]]; then
+    if [[ -e "${STAMP_FILE}" ]]; then
+        exit 0
+    fi
+
+    nohup env BERRYPI_SEQUENCER_BACKGROUND=1 "$0" "$@" </dev/null >> "${LOG_FILE}" 2>&1 &
+    exit 0
+fi
+
+if ! (set -o noclobber; : > "${STAMP_FILE}") 2>/dev/null; then
+    exit 0
+fi
+
+run_cmd() {
+    log "RUN: $*"
+    "$@"
+}
+
+run_group() {
+    local group_name="$1"
+    shift
+    log "START GROUP ${group_name}"
+    "$@"
+    log "END GROUP ${group_name}"
+}
+
+abort() {
+    local line="$1"
+    local status="$2"
+    log "ERROR: command failed at line ${line} with exit status ${status}; aborting"
+    exit "${status}"
+}
+
+trap 'abort "$LINENO" "$?"' ERR
+
+group_a() {
+    run_cmd sudo bcache-wb off
+}
+
+group_b() {
+    run_cmd sudo ip link set eth0 down
+    run_cmd sudo ip link set eth2 down
+    run_cmd sudo ip addr flush dev eth2
+    run_cmd sudo ip link set eth2 promisc on
+    run_cmd sudo ip link set eth2 up
+}
+
+group_c() {
+    run_cmd sudo systemctl daemon-reexec
+    run_cmd sudo systemctl daemon-reload
+}
+
+group_d() {
+    run_cmd sudo service unbound restart
+    run_cmd sudo unbound-control reload
+    run_cmd sudo service unbound restart
+    run_cmd sudo systemctl restart pihole-FTL
+    run_cmd sudo systemctl restart systemd-resolved
+    run_cmd sudo chattr +i /etc/resolv.conf
+}
+
+group_e() {
+    run_cmd sudo systemctl daemon-reexec
+    run_cmd sudo systemctl daemon-reload
+    run_cmd sudo suricata-update
+    run_cmd sudo systemctl restart suricata
+}
+
+group_f() {
+    run_cmd mkdir -p "${EVEBOX_DATA}"
+    run_cmd sudo chown -R 1000:1000 "${EVEBOX_DATA}"
+    run_cmd sudo chmod -R 755 "${EVEBOX_BASE}"
+    run_cmd sudo chown -R pi:pi "${EVEBOX_DATA}"
+    log "RUN: docker run --rm -v /var/log/suricata:/logs:ro jasonish/evebox evebox oneshot /logs/eve.json > ${EVEBOX_DATA}/events.sqlite"
+    docker run --rm -v /var/log/suricata:/logs:ro jasonish/evebox evebox oneshot /logs/eve.json > "${EVEBOX_DATA}/events.sqlite"
+    run_cmd sudo rm -f "${EVEBOX_DATA}"/*.sqlite-shm "${EVEBOX_DATA}"/*.sqlite-wal
+    run_cmd docker run -d --name evebox --restart unless-stopped -p 10.7.12.8:7036:5636 -v /var/log/suricata:/logs:ro -v "${EVEBOX_DATA}:/var/lib/evebox" jasonish/evebox /usr/bin/evebox server --datastore sqlite --input /logs/eve.json
+}
+
+json_escape() {
+    local value="${1:-}"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\t'/\\t}"
+    printf '%s' "${value}"
+}
+
+write_report() {
+    local report_timestamp os_version kernel unbound_status pihole_status eth1_status eth2_status suricata_status evebox_status
+
+    report_timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    os_version="$(. /etc/os-release && printf '%s' "${PRETTY_NAME:-unknown}")"
+    kernel="$(uname -r)"
+    unbound_status="$(systemctl is-active unbound || true)"
+    pihole_status="$(systemctl is-active pihole-FTL || true)"
+
+    set +o pipefail
+    eth1_status="$(ip link show eth1 | grep -q UP && echo up || echo down)"
+    eth2_status="$(ip link show eth2 | grep -q PROMISC && echo PROMISC || echo unknown)"
+    set -o pipefail
+
+    suricata_status="$(systemctl is-active suricata || true)"
+    evebox_status="$(docker inspect evebox --format='{{.State.Status}}' 2>/dev/null || echo unknown)"
+
+    mkdir -p "${REPORT_DIR}"
+    cat > "${REPORT_FILE}" <<EOF
+{
+  "status": "success",
+  "message": "Success booting up, all systems are working",
+  "timestamp": "$(json_escape "${report_timestamp}")",
+  "boot_id": "$(json_escape "${BOOT_ID}")",
+  "os_version": "$(json_escape "${os_version}")",
+  "kernel": "$(json_escape "${kernel}")",
+  "services": {
+    "bcache_wb": "off",
+    "unbound": "$(json_escape "${unbound_status}")",
+    "pihole_ftl": "$(json_escape "${pihole_status}")",
+    "eth0": "down",
+    "eth1": "$(json_escape "${eth1_status}")",
+    "eth2": "$(json_escape "${eth2_status}")",
+    "suricata": "$(json_escape "${suricata_status}")",
+    "evebox": "$(json_escape "${evebox_status}")"
+  }
+}
+EOF
+}
+
+notify_n8n() {
+    if [[ -z "${N8N_WEBHOOK_URL}" ]]; then
+        log "WARN: N8N_WEBHOOK_URL not set — skipping n8n notification"
+        return 0
+    fi
+    log "Notifying n8n boot-gate webhook: ${N8N_WEBHOOK_URL}"
+    if command -v curl >/dev/null 2>&1; then
+        curl -s -X POST "${N8N_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            --max-time 30 \
+            -d @"${REPORT_FILE}" \
+            && log "n8n notification sent successfully" \
+            || log "WARN: n8n webhook notification failed (non-fatal)"
+    else
+        log "WARN: curl not found — cannot notify n8n"
+    fi
+}
+
+log "berrypi boot sequencer started for boot_id=${BOOT_ID}"
+run_group "A - bcache" group_a
+run_group "B - Network" group_b
+run_group "C - Systemd reload" group_c
+run_group "D - DNS" group_d
+run_group "E - Suricata" group_e
+run_group "F - Evebox" group_f
+write_report
+notify_n8n
+log "berrypi boot sequencer completed successfully"

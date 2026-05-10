@@ -1,0 +1,10 @@
+[Unit]
+Description=BerryPi boot sequencer
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/berrypi-boot-sequencer --systemd
+
+[Install]
+WantedBy=multi-user.target
