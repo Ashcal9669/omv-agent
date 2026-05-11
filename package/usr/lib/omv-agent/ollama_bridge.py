@@ -74,7 +74,7 @@ def _ollama_generate(prompt: str) -> str | None:
 
 
 def _select_model() -> str:
-    """Use configured model, otherwise pick the first locally installed Qwen model."""
+    """Detect the best available model, prioritizing models with '3b' or '7b' in their name."""
     if OLLAMA_MODEL.strip():
         return OLLAMA_MODEL.strip()
     if not _is_loopback_url(OLLAMA_URL):
@@ -96,9 +96,14 @@ def _select_model() -> str:
         for m in models
         if isinstance(m, dict) and str(m.get("name", "")).strip()
     ]
-    for name in names:
-        if "qwen" in name.lower():
-            return name
+
+    # Prioritize 3b or 7b models as they are generally better suited for edge/NAS use
+    for size in ["3b", "7b"]:
+        for name in names:
+            if size in name.lower():
+                return name
+    
+    # Fallback to the first available model if no 3b/7b found
     return names[0] if names else ""
 
 

@@ -248,39 +248,30 @@ def query():
     if previous:
         return jsonify({"answer": previous, "is_system_change": False, "warning_message": "", "already_answered": True, "sources": []})
 
-    ollama_interpretation = None
-    stored_ollama_answer = None
+    ollama_interpretation = interpret_question(question, context_page=context_page)
 
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
-        ollama_interpretation = interpret_question(question, context_page=context_page)
-        if ollama_interpretation:
-            stored_ollama_answer = ollama_interpretation.get("answer")
-            if ollama_interpretation.get("in_scope"):
-                rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
-                enriched_q = _enrich(rewritten_q or question, ctx)
-                if not brain.is_relevant(enriched_q) and not detect_query_type(enriched_q):
-                    ans = str(stored_ollama_answer).strip() or "I understand this as OMV related but have no local data."
-                    return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
-            else:
-                ans = str(stored_ollama_answer).strip() or "I specialize in OMV, NAS and Linux storage."
-                return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
+        if ollama_interpretation and ollama_interpretation.get("in_scope"):
+            rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
+            enriched_q = _enrich(rewritten_q or question, ctx)
+        else:
+            ans = (ollama_interpretation.get("answer") if ollama_interpretation else None) or "I specialize in OMV, NAS and Linux storage."
+            return jsonify({"answer": ans, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": []})
 
     else:
         probe_type = "anomalies" if agent_alert_query else detect_query_type(enriched_q)
-    if probe_type:
-        probe_answer = run_probe(probe_type, question)
-        if probe_answer:
-            brain.record_answer(session_id, q_hash, probe_answer)
-            _store_ctx(session_id, question, probe_answer)
-            return jsonify({"answer": probe_answer, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": [{"id": "live-probe", "title": "Live Data", "topic": "system"}]})
+        if probe_type:
+            probe_answer = run_probe(probe_type, question)
+            if probe_answer:
+                brain.record_answer(session_id, q_hash, probe_answer)
+                _store_ctx(session_id, question, probe_answer)
+                return jsonify({"answer": probe_answer, "is_system_change": False, "warning_message": "", "already_answered": False, "sources": [{"id": "live-probe", "title": "Live Data", "topic": "system"}]})
 
     results = brain.search(enriched_q, context_page=context_page, top_k=3)
     confident = results if results and brain.is_confident_match(enriched_q, results[0]) else []
 
     if not confident:
-        ans = str(stored_ollama_answer).strip() if stored_ollama_answer else None
-        if not ans or "specialized" in ans.lower():
-            ans = answer_question(enriched_q, context_page=context_page)
+        ans = answer_question(enriched_q, context_page=context_page)
         if not ans:
             ans = "I do not have specific info in my knowledge base."
         answer, sources = ans, []
