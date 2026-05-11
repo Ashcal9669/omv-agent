@@ -207,6 +207,12 @@ def detect_query_type(question: str) -> str | None:
     if any(p in q for p in ["zpool status", "zfs pool status", "zfs status"]):
         return "zfs"
 
+    # ── Full system report ───────────────────────────────────────────────────
+    if any(p in q for p in ["system report", "full report", "full system", "generate report",
+                              "generate full", "overall status", "overall health",
+                              "status of the system", "status of my system"]):
+        return "system_report"
+
     # ── Block device list ────────────────────────────────────────────────────
     if any(w in q for w in ["list my disks", "list disks", "all disks",
                               "drives attached", "lsblk", "what drives",
@@ -277,7 +283,7 @@ def run_probe(probe_type: str, question: str) -> str | None:
     if probe_type == "capabilities":
         divider = "─" * 48
         return (
-            f"OMV Agent v1.7.1 — What I Can Help With\n{divider}\n"
+            f"OMV Agent v1.7.2 — What I Can Help With\n{divider}\n"
             f"Live System Data (real-time from probe daemon):\n"
             f"  • Drive temperatures — NVMe, SATA, HDD\n"
             f"  • CPU / SoC temperature\n"
@@ -862,6 +868,73 @@ def run_probe(probe_type: str, question: str) -> str | None:
                 icon = "❌" if a.get("level") == "critical" else "⚠️"
                 lines.append(f"{icon} {a.get('msg', '')}")
             return f"System Anomalies\n{divider}\n" + "\n".join(lines)
+
+        # ── Full system report ────────────────────────────────────────────────
+        elif probe_type == "system_report":
+            divider = "─" * 48
+            sections = []
+
+            # Load
+            sys_data = cache.get("system", {})
+            load = sys_data.get("load_avg", [])
+            mem = sys_data.get("memory", {})
+            uptime = sys_data.get("uptime_human", "")
+            cpu_temp = sys_data.get("cpu_temp_c")
+            if load:
+                mem_used = mem.get("used_mb", "?")
+                mem_total = mem.get("total_mb", "?")
+                cpu_icon = "✅" if cpu_temp and cpu_temp < 70 else ("⚠️" if cpu_temp else "?")
+                sections.append(
+                    f"System  (live)\n{divider}\n"
+                    f"  Uptime:   {uptime}\n"
+                    f"  Load:     {load[0]:.2f} / {load[1]:.2f} / {load[2]:.2f}  (1/5/15 min)\n"
+                    f"  Memory:   {mem_used} MB used / {mem_total} MB total\n"
+                    f"  CPU Temp: {cpu_icon} {cpu_temp}°C" if cpu_temp else
+                    f"System  (live)\n{divider}\n"
+                    f"  Uptime: {uptime}\n"
+                    f"  Load:   {load[0]:.2f} / {load[1]:.2f} / {load[2]:.2f}"
+                )
+
+            # Drive temps
+            drives = cache.get("drives", {})
+            if drives:
+                lines = [
+                    f"  {d}: {i.get('temperature_c','?')}°C — {_temp_label(i.get('temperature_c', 0)) if isinstance(i.get('temperature_c'), int) else '?'}"
+                    for d, i in sorted(drives.items())
+                ]
+                sections.append(f"Drive Temperatures  (live)\n{divider}\n" + "\n".join(lines))
+
+            # Disk usage
+            df = cache.get("df", [])
+            if df:
+                lines = [
+                    f"  {r.get('mount','?'):20s} {r.get('use_pct','?'):>4}  {r.get('avail','?')} free"
+                    for r in df
+                ]
+                sections.append(f"Disk Usage  (live)\n{divider}\n" + "\n".join(lines))
+
+            # RAID
+            raid = cache.get("raid", {})
+            if raid and raid.get("raid") != "none":
+                arrays = raid.get("raid_arrays", {})
+                lines = []
+                for name, info in arrays.items():
+                    detail = info.get("detail", "")
+                    state_m = re.search(r'State\s*:\s*(.+)', detail)
+                    state = state_m.group(1).strip() if state_m else info.get("status_line", "unknown")
+                    ok = "clean" in state.lower() or "active" in state.lower()
+                    lines.append(f"  {name}: {'✅' if ok else '⚠️'} {state}")
+                sections.append(f"RAID  (live)\n{divider}\n" + "\n".join(lines))
+
+            # Anomalies
+            anomalies = cache.get("anomalies", [])
+            if anomalies:
+                lines = [f"  {'❌' if a.get('level') == 'critical' else '⚠️'} {a.get('msg','')}" for a in anomalies]
+                sections.append(f"Anomalies  (live)\n{divider}\n" + "\n".join(lines))
+            else:
+                sections.append(f"Anomalies  (live)\n{divider}\n  ✅ No anomalies detected")
+
+            return "\n\n".join(sections) if sections else "No live data available."
 
     except Exception as e:
         return f"Probe error: {str(e)[:120]}"

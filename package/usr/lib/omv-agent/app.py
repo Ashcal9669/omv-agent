@@ -36,7 +36,7 @@ KNOWLEDGE_JSON = os.environ.get(
     "OMV_AGENT_KNOWLEDGE",
     "/usr/share/omv-agent/knowledge/knowledge_base.json"
 )
-VERSION = "1.7.1"
+VERSION = "1.7.2"
 MAX_QUESTION_LEN = 500
 ALLOWED_CONTENT_TYPE = "application/json"
 
@@ -247,8 +247,6 @@ def query():
     previous = brain.was_already_answered(session_id, q_hash)
     if previous:
         return jsonify({"answer": previous, "is_system_change": False, "warning_message": "", "already_answered": True, "sources": []})
-
-    ollama_interpretation = interpret_question(question, context_page=context_page)
 
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
         ollama_interpretation = interpret_question(question, context_page=context_page)

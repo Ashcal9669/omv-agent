@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_DIR="$SCRIPT_DIR/package"
 OUT_DIR="$SCRIPT_DIR/dist"
 VER_DIR="$SCRIPT_DIR/versions"
-VERSION="1.7.1"
+VERSION="1.7.2"
 PKG_NAME="openmediavault-agent_${VERSION}_all.deb"
 
 sync_control_version() {

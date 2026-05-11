@@ -35,7 +35,7 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 ## Install
 
 ```bash
-sudo dpkg -i dist/openmediavault-agent_1.7.1_all.deb
+sudo dpkg -i dist/openmediavault-agent_1.7.2_all.deb
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -60,4 +60,4 @@ bash build.sh
 
 ## Version
 
-`1.7.1` - Global version alignment, stability fixes, and integration of system report generation (berrypi-boot-sequencer). Resolved routing and syntax issues from previous 1.7.x attempts.
+`1.7.2` - Ollama integration fix, nginx timeout increase, system_report probe, and optimized routing to skip Ollama for live probe queries.
