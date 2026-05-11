@@ -164,8 +164,7 @@ find "$PKG_DIR" -type f ! -path "*/DEBIAN/*" -exec chmod 644 {} \;
 # Keep DEBIAN scripts executable
 chmod 755 "$PKG_DIR/DEBIAN/postinst" \
            "$PKG_DIR/DEBIAN/prerm" \
-           "$PKG_DIR/DEBIAN/postrm" \
-           "$PKG_DIR/usr/local/bin/berrypi-boot-sequencer"
+           "$PKG_DIR/DEBIAN/postrm"
 
 # Validate control file
 echo "[4/7] Validating package structure..."
@@ -193,8 +192,6 @@ REQUIRED=(
     "usr/lib/omv-agent/discoverer.py"
     "usr/share/openmediavault/workbench/navigation.d/omv-agent.yaml"
     "usr/share/openmediavault/workbench/route.d/omv-agent.json"
-    "usr/local/bin/berrypi-boot-sequencer"
-    "etc/systemd/system/berrypi-boot-sequencer.service"
 )
 for f in "${REQUIRED[@]}"; do
     if [ ! -f "$PKG_DIR/$f" ]; then
