@@ -251,6 +251,7 @@ def query():
     ollama_interpretation = interpret_question(question, context_page=context_page)
 
     if not brain.is_relevant(enriched_q) and not agent_alert_query:
+        ollama_interpretation = interpret_question(question, context_page=context_page)
         if ollama_interpretation and ollama_interpretation.get("in_scope"):
             rewritten_q = str(ollama_interpretation.get("rewritten_question", "")).strip()
             enriched_q = _enrich(rewritten_q or question, ctx)
