@@ -101,6 +101,9 @@ SEARCH_STOPWORDS = {
     "on", "please", "show", "tell", "that", "the", "their", "them", "then",
     "there", "this", "to", "was", "what", "when", "where", "whether", "why",
     "with", "you", "your",
+    # Domain-generic terms that appear in every KB article — not useful for confidence
+    "omv", "openmediavault", "linux", "system", "server", "nas", "set", "up",
+    "use", "using", "get", "open", "media", "vault", "manage", "management",
 }
 
 
@@ -475,7 +478,7 @@ class Brain:
         strong_hits = {t for t in query_terms if t in strong_text}
         full_hits = {t for t in query_terms if t in full_text}
 
-        if strong_hits:
+        if len(strong_hits) >= 2:
             return True
 
         # For short natural questions, require the meaningful term to appear in
