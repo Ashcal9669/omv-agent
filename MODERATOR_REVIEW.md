@@ -17,7 +17,7 @@ A floating assistant widget embedded in every OMV 8 page. Answers NAS, storage, 
 | Concern | Answer |
 |---|---|
 | Runs as root? | Probe daemon only — required for smartctl/hwmon. No socket, unreachable from network. |
-| Network exposure? | Flask bound to `1.7.1.0.1:11111` only. nginx proxies with rate limiting (10 req/min). |
+| Network exposure? | Flask bound to `127.0.0.1:11111` only. nginx proxies with rate limiting (10 req/min). |
 | Outbound calls? | Zero by default. Optional Ollama fallback is loopback-only and only for in-scope OMV/NAS/Linux phrasing. |
 | Watcher daemon? | `PrivateNetwork=yes`, `CapabilityBoundingSet=` (empty) — kernel-enforced isolation. |
 | UI injection safe? | All responses use `textContent`, never `innerHTML`. No XSS path. |
@@ -37,7 +37,7 @@ Browser → nginx → omv-agent.service     (www-data, reads SQLite, returns tex
           omv-agent-probe.service        (root, hardware telemetry, no socket)
           omv-agent-watch.service        (dedicated user, PrivateNetwork=yes)
 
-Optional: omv-agent.service → local Ollama on 1.7.1.0.1:11434 only
+Optional: omv-agent.service → local Ollama on 127.0.0.1:11434 only
 ```
 
 A compromise of the Flask API gains `www-data` only — cannot touch the probe or watcher pipelines.
