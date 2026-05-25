@@ -27,6 +27,7 @@ Environment=OMV_AGENT_PORT=11111
 Environment=OMV_AGENT_DB=/var/lib/omv-agent/brain.db
 Environment=OMV_AGENT_KNOWLEDGE=/usr/share/omv-agent/knowledge/knowledge_base.json
 Environment=OMV_AGENT_OLLAMA_ENABLED=1
+#Environment=OMV_AGENT_OLLAMA_MODEL=(your-desired-model-here/model downloaded-through-ollama)
 Environment=OMV_AGENT_OLLAMA_URL=http://127.0.0.1:11334
 Environment=OMV_AGENT_OLLAMA_TIMEOUT=500
 
