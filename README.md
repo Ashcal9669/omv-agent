@@ -32,6 +32,12 @@ An intelligent, context-aware assistant for **OpenMediaVault 8** — a persisten
 | `omv-agent-watch` | omv-agent-watch | Observes journal, services, devices — emits alerts |
 | `omv-agent` | www-data | Flask API — answers queries, serves events |
 
+**Optional Ollama:** disabled by default. To enable the local fallback, specify your downloaded model via `OMV_AGENT_OLLAMA_MODEL=(your-model)` inside `/etc/systemd/system/multi-user.target.wants/omv-agent.service` and remove the (#). The bridge uses `http://127.0.0.1:11334` to prevent port conflicts with default Ollama services, and only accepts loopback Ollama URLs. Note: You must choose a model that is already downloaded in Ollama. Also, run 
+```bash
+echo 'export OLLAMA_HOST="127.0.0.1:11334"' >> ~/.bashrc
+source ~/.bashrc
+```
+
 ## Install
 
 ```bash
